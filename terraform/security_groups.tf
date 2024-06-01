@@ -51,3 +51,32 @@ resource "aws_security_group" "polybot_sg" {
     Terraform = "true"
   }
 }
+
+###########################################
+# Security group for Yolov5 EC2 instances #
+###########################################
+
+resource "aws_security_group" "yolov5_sg" {
+  name_prefix = "yolov5-sg-"
+  vpc_id      = aws_vpc.main-vpc.id
+
+  ingress {
+    from_port   = var.yolov5_port
+    to_port     = var.yolov5_port
+    protocol    = "tcp"
+    #TODO change the security group to the auto scaling SG
+    security_groups = [] # restricts inbound traffic to only come from the ASG
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.owner}-yolov5-sg-${var.project}"
+    Terraform = "true"
+  }
+}

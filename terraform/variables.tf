@@ -20,32 +20,18 @@ type        = string
 }
 
 variable "availability_zone_1" {
-description = "Deployment region"
+description = "first availability zone"
 type        = string
 }
 
 variable "availability_zone_2" {
-  description = "Deployment region"
+  description = "second availability zone"
   type        = string
 }
 
-#########################
-# EC2 instance settings #
-#########################
-
-variable "ubuntu_ami" {
-  description = "desired ubuntu ami"
+variable "public_key_path" {
+  description = "SSH key"
   type        = string
-}
-
-variable "instance_type" {
-  description = "set the desired instance type"
-  type        = string
-}
-
-variable "polybot_machines" {
-  description = "set the desired instances number"
-  type        = number
 }
 
 ##################
@@ -80,10 +66,61 @@ variable "public_subnet_2" {
   type        = string
 }
 
-################
-# Polybot_vars #
-################
-variable "polybot_port" {
-  description = "Deployment region"
+#########################
+# EC2 instance settings #
+#########################
+
+variable "ubuntu_ami" {
+  description = "desired ubuntu ami"
   type        = string
+}
+
+variable "instance_type" {
+  description = "set the desired instance type"
+  type        = string
+}
+
+################
+# Polybot vars #
+################
+variable "polybot_machines" {
+  description = "set the desired instances number"
+  type        = number
+}
+
+variable "polybot_ami" {
+  description = "Image for the polybot instance"
+  type        = string
+}
+
+variable "polybot_port" {
+  description = "Polybot port number"
+  type        = string
+}
+
+###############
+# Yolov5 vars #
+################
+variable "yolov5_ami" {
+  description = "Image for the yolov5 instance"
+  type        = string
+}
+
+variable "yolov5_port" {
+  description = "Yolov5 port number"
+  type        = string
+}
+
+variable "yolov5_instance_type" {
+  description = "Yolov5 instance type "
+  type        = string
+}
+
+###########################
+# Auto scaling group vars #
+###########################
+
+variable "desired_capacity" {
+  description = "desired number of instances in the Auto Scaling Group when it is created"
+  type        = number
 }

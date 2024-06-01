@@ -1,19 +1,17 @@
-### VPC ###
-
-# Create a VPC
+#######
+# VPC #
+#######
 resource "aws_vpc" "main-vpc" {
   cidr_block = var.main_vpc_cidr
-
 
   tags = {
     Name = "${var.owner}-vpc-${var.project}"
     Terraform = "true"
   }
 }
-
-### Subnets ###
-
-# Create public subnets
+###########
+# Subnets #
+###########
 resource "aws_subnet" "public_subnet_1" {
   vpc_id     = aws_vpc.main-vpc.id
   cidr_block = var.public_subnet_1
@@ -36,9 +34,9 @@ resource "aws_subnet" "public_subnet_2" {
   }
 }
 
-### Internet Gateway ###
-
-# Create an internet gateway
+####################
+# Internet Gateway #
+####################
 resource "aws_internet_gateway" "main-igw" {
   vpc_id = aws_vpc.main-vpc.id
 
@@ -47,8 +45,10 @@ resource "aws_internet_gateway" "main-igw" {
     Terraform = "true"
   }
 }
+###############
+# Route table #
+###############
 
-# Create a route table for public subnets
 resource "aws_route_table" "public-rt" {
   vpc_id = aws_vpc.main-vpc.id
 

@@ -14,9 +14,9 @@ resource "aws_route_table_association" "public_subnet_2_association" {
 ########################################################
 # Associate the target group with the Polybot instance #
 ########################################################
-resource "aws_lb_target_group_attachment" "polybot_attachment" {
-  count            = var.polybot_machines
-  target_group_arn = aws_lb_target_group.polybot_tg.arn
-  target_id        = element(aws_instance.polybot.*.id, count.index)
-  port             = var.polybot_port
-}
+# resource "aws_lb_target_group_attachment" "polybot_attachment" {
+#   count            = var.polybot_machines
+#   target_group_arn = aws_lb_target_group.polybot_tg.arn
+#   target_id        = element(aws_instance.polybot.*.id, count.index)
+#   port             = var.polybot_port
+# }
