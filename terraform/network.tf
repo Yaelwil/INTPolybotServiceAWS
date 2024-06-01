@@ -2,7 +2,7 @@
 
 # Create a VPC
 resource "aws_vpc" "main-vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.main_vpc_cidr
 
 
   tags = {
@@ -16,7 +16,7 @@ resource "aws_vpc" "main-vpc" {
 # Create public subnets
 resource "aws_subnet" "public_subnet_1" {
   vpc_id     = aws_vpc.main-vpc.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = var.public_subnet_1
   availability_zone = var.availability_zone_1 # Change the availability zone as needed
 
   tags = {
@@ -27,7 +27,7 @@ resource "aws_subnet" "public_subnet_1" {
 
 resource "aws_subnet" "public_subnet_2" {
   vpc_id     = aws_vpc.main-vpc.id
-  cidr_block = "10.0.2.0/24"
+  cidr_block = var.public_subnet_2
   availability_zone = var.availability_zone_2 # Change the availability zone as needed
 
   tags = {

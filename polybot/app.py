@@ -44,6 +44,12 @@ def load_test():
     return 'Ok'
 
 
+# Route for health checks
+@app.route('/health_checks/', methods=['GET', 'POST'])
+def health_checks():
+    return 'Ok'
+
+
 if __name__ == "__main__":
     bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
 
