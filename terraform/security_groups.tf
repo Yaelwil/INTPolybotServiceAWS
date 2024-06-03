@@ -39,6 +39,13 @@ resource "aws_security_group" "polybot_sg" {
     security_groups = [aws_security_group.alb_sg.id] # restricts inbound traffic to only come from the ALB
   }
 
+    ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+       cidr_blocks = ["0.0.0.0/0"]  # Allowing SSH access from anywhere (replace with a more restricted CIDR block if necessary)
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

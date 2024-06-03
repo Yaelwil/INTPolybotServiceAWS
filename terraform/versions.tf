@@ -12,4 +12,11 @@ terraform {
   }
 
   required_version = ">= 1.2.0"
+
+    backend "s3" {
+    bucket = "yaelwil-bucket-tf-project-tfstate-file"
+    key    = "tfstate.json"
+    region = "eu-west-1"
+    # optional: dynamodb_table = "<table-name>"
+  }
 }
