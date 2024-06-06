@@ -88,11 +88,6 @@ variable "polybot_machines" {
   type        = number
 }
 
-variable "polybot_ami" {
-  description = "Image for the polybot instance"
-  type        = string
-}
-
 variable "polybot_port" {
   description = "Polybot port number"
   type        = string
@@ -101,10 +96,6 @@ variable "polybot_port" {
 ###############
 # Yolov5 vars #
 ################
-variable "yolov5_ami" {
-  description = "Image for the yolov5 instance"
-  type        = string
-}
 
 variable "yolov5_port" {
   description = "Yolov5 port number"
@@ -112,7 +103,16 @@ variable "yolov5_port" {
 }
 
 variable "yolov5_instance_type" {
-  description = "Yolov5 instance type "
+  description = "Yolov5 instance type"
+  type        = string
+}
+
+################
+# filters vars #
+################
+
+variable "filters_instance_type" {
+  description = "filters instance type"
   type        = string
 }
 
@@ -122,5 +122,15 @@ variable "yolov5_instance_type" {
 
 variable "desired_capacity" {
   description = "desired number of instances in the Auto Scaling Group when it is created"
+  type        = number
+}
+
+variable "min_size" {
+  description = "Minimum running instances"
+  type        = number
+}
+
+variable "max_size" {
+  description = "Maximum running instances"
   type        = number
 }

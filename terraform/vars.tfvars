@@ -27,9 +27,13 @@ polybot_ami = ""
 polybot_port = "8443"
 
 # Yolov5 vars
-yolov5_ami = ""
 yolov5_port = "8081"
 yolov5_instance_type = "t2.medium"
 
+# filters vars
+filters_instance_type = "t2.micro"
+
 # Auto scaling group vars
 desired_capacity = 2
+min_size         = 0
+max_size         = 5

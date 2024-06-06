@@ -105,3 +105,4 @@ resource "aws_iam_instance_profile" "polybot_instance_profile" {
 resource "aws_iam_instance_profile" "yolov5_instance_profile" {
   name = "yolov5-instance-profile"
   role = aws_iam_role.yolov5_role.name
+}

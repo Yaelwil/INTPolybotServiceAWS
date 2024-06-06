@@ -45,7 +45,7 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
           "dynamodb:UpdateItem"
         ],
         #TODO put the required variables
-        Resource = "arn:aws:dynamodb:us-west-2:your-account-id:table/${dynamodb_table_name}",
+        Resource = "arn:aws:dynamodb:us-west-2:your-account-id:table/${aws_dynamodb_table.results.name}",
         Condition = {
           IpAddress = {
             "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
