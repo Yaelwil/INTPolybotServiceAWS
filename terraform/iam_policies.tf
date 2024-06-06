@@ -56,9 +56,39 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
   })
 }
 
-#######################
-# Access to SQS queue #
-#######################
+##############################
+# Access to Yolov5 SQS queue #
+##############################
+
+resource "aws_iam_policy" "sqs_access_policy" {
+  name        = "sqs-access-policy"
+  description = "Policy for SQS access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        Resource = "arn:aws:sqs:us-west-2:your-account-id:${var.sqs_queue_name}",
+        Condition = {
+          IpAddress = {
+            "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
+          }
+        }
+      }
+    ]
+  })
+}
+
+###############################
+# Access to filters SQS queue #
+###############################
 
 resource "aws_iam_policy" "sqs_access_policy" {
   name        = "sqs-access-policy"
