@@ -3,6 +3,7 @@ from loguru import logger
 import os
 import time
 from telebot.types import InputFile
+from s3_upload import Detect_Filters
 
 
 class Bot:
@@ -72,6 +73,37 @@ class ObjectDetectionBot(Bot):
         if self.is_current_msg_photo(msg):
             photo_path = self.download_user_photo(msg)
 
+        def upload_to_s3():
+            # Rename the photo with timestamp
+            try:
+                detect_filters_instance = Detect_Filters(photo_path)
+                # Rename the photo with timestamp
+                new_photo_path, new_file_name = detect_filters_instance.rename_photo_with_timestamp(photo_path)
+            except Exception as e:
+                logger.error(f"Error renaming photo: {e}")
+                raise
+
+            if new_photo_path and new_file_name:
+
+                # Upload the photo to S3 and make sure the directory exists
+                try:
+                    detect_filters_instance = Detect_Filters(new_photo_path)
+                    s3_key = detect_filters_instance.upload_photo_to_s3(new_photo_path)
+                except Exception as e:
+                    logger.error(f"Error uploading photo to S3: {e}")
+                    return None
+
+                if s3_key:
+                    return
+
+                else:
+                    logger.error("Error uploading photo to S3.")
+            else:
+                logger.error("Error renaming photo.")
+
             # TODO upload the photo to S3
+        upload_to_s3()
+
+
             # TODO send a job to the SQS queue
             # TODO send message to the Telegram end-user (e.g. Your image is being processed. Please wait...)
