@@ -23,7 +23,6 @@ instance_type = "t2.micro"
 
 # Polybot vars
 polybot_machines = 2
-polybot_ami = ""
 polybot_port = "8443"
 
 # Yolov5 vars
@@ -35,5 +34,5 @@ filters_instance_type = "t2.micro"
 
 # Auto scaling group vars
 desired_capacity = 2
-min_size         = 0
+min_size         = 1
 max_size         = 5

@@ -60,8 +60,8 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
 # Access to Yolov5 SQS queue #
 ##############################
 
-resource "aws_iam_policy" "sqs_access_policy" {
-  name        = "sqs-access-policy"
+resource "aws_iam_policy" "sqs_yolov5_access_policy" {
+  name        = "yolov5-sqs-access-policy"
   description = "Policy for SQS access"
 
   policy = jsonencode({
@@ -75,7 +75,7 @@ resource "aws_iam_policy" "sqs_access_policy" {
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ],
-        Resource = "arn:aws:sqs:us-west-2:your-account-id:${var.sqs_queue_name}",
+        Resource = aws_sqs_queue.yolov5_sqs_queue.arn,
         Condition = {
           IpAddress = {
             "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
@@ -85,13 +85,14 @@ resource "aws_iam_policy" "sqs_access_policy" {
     ]
   })
 }
+
 
 ###############################
 # Access to filters SQS queue #
 ###############################
 
-resource "aws_iam_policy" "sqs_access_policy" {
-  name        = "sqs-access-policy"
+resource "aws_iam_policy" "sqs_filters_access_policy" {
+  name        = "filters-sqs-access-policy"
   description = "Policy for SQS access"
 
   policy = jsonencode({
@@ -105,7 +106,7 @@ resource "aws_iam_policy" "sqs_access_policy" {
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ],
-        Resource = "arn:aws:sqs:us-west-2:your-account-id:${var.sqs_queue_name}",
+        Resource = aws_sqs_queue.filters_sqs_queue.arn,
         Condition = {
           IpAddress = {
             "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
@@ -116,24 +117,25 @@ resource "aws_iam_policy" "sqs_access_policy" {
   })
 }
 
+
 #############################
 # Access to secrets manager #
 #############################
 
-resource "aws_iam_policy" "secretsmanager_access_policy" {
-  name        = "secretsmanager-access-policy"
-  description = "Policy for Secrets Manager access"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ],
-        Resource = aws_secretsmanager_secret.example.arn
-      }
-    ]
-  })
-}
+# resource "aws_iam_policy" "secretsmanager_access_policy" {
+#   name        = "secretsmanager-access-policy"
+#   description = "Policy for Secrets Manager access"
+#
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Action = [
+#           "secretsmanager:GetSecretValue"
+#         ],
+#         Resource = aws_secretsmanager_secret.example.arn
+#       }
+#     ]
+#   })
+# }

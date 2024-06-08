@@ -25,6 +25,62 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
+##########################################
+# Security group for Auto Scaling Group #
+##########################################
+
+resource "aws_security_group" "asg_sg" {
+  name_prefix = "asg-sg-"
+  vpc_id      = aws_vpc.main-vpc.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
+    security_groups = [] # restricts inbound traffic to only come from the ALB
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.owner}-asg-sg-${var.project}"
+    Terraform = "true"
+  }
+}
+
+# ###########################################
+# # Security group for Simple Queue Service #
+# ###########################################
+#
+# resource "aws_security_group" "sqs_sg" {
+#   name_prefix = "sqs-sg-"
+#   vpc_id      = aws_vpc.main-vpc.id
+#
+#   ingress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "tcp"
+#     security_groups = [] # restricts inbound traffic to only come from the ALB
+#   }
+#
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#
+#   tags = {
+#     Name = "${var.owner}-sqs-sg-${var.project}"
+#     Terraform = "true"
+#   }
+# }
+
 ############################################
 # Security group for Polybot EC2 instances #
 ############################################

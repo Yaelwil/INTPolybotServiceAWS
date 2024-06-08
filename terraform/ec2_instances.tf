@@ -10,6 +10,7 @@ resource "aws_instance" "polybot" {
   key_name = aws_key_pair.public_key.key_name
   associate_public_ip_address = true  # Enable auto-assigned public IP address
   iam_instance_profile = aws_iam_instance_profile.polybot_instance_profile.name
+  user_data = file("./docker_installation.sh")
 
   tags = {
     Name = "${var.owner}-polybot-${var.project}-${count.index + 1 }"

@@ -6,9 +6,13 @@ resource "aws_lb" "main-alb" {
   subnets            = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
 
   tags = {
-    Name = "${var.owner}-alb-${var.project}"
+    Name      = "${var.owner}-alb-${var.project}"
     Terraform = "true"
   }
+}
+
+output "alb_dns_name" {
+  value = aws_lb.main-alb.dns_name
 }
 
 resource "aws_lb_target_group" "polybot_tg" {
@@ -39,7 +43,7 @@ resource "aws_lb_listener" "listener" {
   protocol = "HTTPS" # protocol used by the listener
   ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
   # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
-  certificate_arn = "arn:aws:acm:${var.region}:ACCOUNT_ID:certificate/CERTIFICATE_ID"
+  certificate_arn   = aws_acm_certificate.certificate_creation.arn
 
   default_action {
     type = "forward" # matching requests should be forwarded to a target group.
