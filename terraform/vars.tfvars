@@ -33,6 +33,6 @@ yolov5_instance_type = "t2.medium"
 filters_instance_type = "t2.micro"
 
 # Auto scaling group vars
-desired_capacity = 2
+desired_capacity = 1
 min_size         = 1
 max_size         = 5

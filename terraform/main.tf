@@ -41,3 +41,13 @@ resource "null_resource" "wait_for_dns_records" {
 
   depends_on = [aws_route53_record.cert_validation]
 }
+
+resource "aws_network_acl_association" "subnet1_association" {
+  subnet_id          = aws_subnet.public_subnet_1.id
+  network_acl_id     = aws_network_acl.acl_rules.id
+}
+
+resource "aws_network_acl_association" "subnet2_association" {
+  subnet_id          = aws_subnet.public_subnet_2.id
+  network_acl_id     = aws_network_acl.acl_rules.id
+}
