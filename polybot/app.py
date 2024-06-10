@@ -45,9 +45,9 @@ def load_test():
 
 
 # Route for health checks
-@app.route('/health_checks/', methods=['GET', 'POST'])
+@app.route('/health_checks/', methods=['GET'])
 def health_checks():
-    return 'Ok'
+    return 200
 
 
 if __name__ == "__main__":

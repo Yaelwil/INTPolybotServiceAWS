@@ -4,6 +4,7 @@ import os
 import time
 from telebot.types import InputFile
 from s3_upload import Detect_Filters
+from send_SQS import sqs_queue
 
 
 class Bot:
@@ -70,40 +71,39 @@ class ObjectDetectionBot(Bot):
     def handle_message(self, msg):
         logger.info(f'Incoming message: {msg}')
 
+        if 'photo' in msg:
+            if 'caption' in msg:
+                photo_caption = msg['caption'].lower()
         if self.is_current_msg_photo(msg):
             photo_path = self.download_user_photo(msg)
+            if photo_path:
+                self.upload_to_s3(photo_path)
 
-        def upload_to_s3():
-            # Rename the photo with timestamp
+# TODO upload the photo to S3
+    def upload_to_s3(self, photo_path):
+        # Rename the photo with timestamp
+        try:
+            detect_filters_instance = Detect_Filters(photo_path)
+            new_photo_path, new_file_name = detect_filters_instance.rename_photo_with_timestamp(photo_path)
+        except Exception as e:
+            logger.error(f"Error renaming photo: {e}")
+            return
+
+        if new_photo_path and new_file_name:
+            # Upload the photo to S3
             try:
-                detect_filters_instance = Detect_Filters(photo_path)
-                # Rename the photo with timestamp
-                new_photo_path, new_file_name = detect_filters_instance.rename_photo_with_timestamp(photo_path)
-            except Exception as e:
-                logger.error(f"Error renaming photo: {e}")
-                raise
-
-            if new_photo_path and new_file_name:
-
-                # Upload the photo to S3 and make sure the directory exists
-                try:
-                    detect_filters_instance = Detect_Filters(new_photo_path)
-                    s3_key = detect_filters_instance.upload_photo_to_s3(new_photo_path)
-                except Exception as e:
-                    logger.error(f"Error uploading photo to S3: {e}")
-                    return None
-
+                s3_key = detect_filters_instance.upload_photo_to_s3(new_photo_path)
                 if s3_key:
-                    return
-
+                    logger.info(f"Successfully uploaded photo to S3 with key: {s3_key}")
                 else:
-                    logger.error("Error uploading photo to S3.")
-            else:
-                logger.error("Error renaming photo.")
-
-            # TODO upload the photo to S3
-        upload_to_s3()
-
+                    logger.error("Failed to upload photo to S3.")
+            except Exception as e:
+                logger.error(f"Error uploading photo to S3: {e}")
+        else:
+            logger.error("Error renaming photo.")
 
             # TODO send a job to the SQS queue
-            # TODO send message to the Telegram end-user (e.g. Your image is being processed. Please wait...)
+    def send_sqs_queue(self, photo_caption):
+        send_SQS_instance = Detect_Filters(photo_caption)
+        send_SQS_instance.send_sqs_queue(photo_caption)
+        # TODO send message to the Telegram end-user (e.g. Your image is being processed. Please wait...)
