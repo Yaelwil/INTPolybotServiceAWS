@@ -4,7 +4,7 @@ import os
 import time
 from telebot.types import InputFile
 from s3_upload import Detect_Filters
-from send_SQS import sqs_queue
+from send_SQS import SqsQueue
 
 
 class Bot:
@@ -104,6 +104,6 @@ class ObjectDetectionBot(Bot):
 
             # TODO send a job to the SQS queue
     def send_sqs_queue(self, photo_caption):
-        send_SQS_instance = Detect_Filters(photo_caption)
+        send_SQS_instance = SqsQueue()
         send_SQS_instance.send_sqs_queue(photo_caption)
         # TODO send message to the Telegram end-user (e.g. Your image is being processed. Please wait...)
