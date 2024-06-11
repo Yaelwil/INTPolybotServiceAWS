@@ -2,10 +2,10 @@ from datetime import datetime
 import os
 import boto3
 
-images_bucket = os.environ['BUCKET_NAME']
+images_bucket = os.getenv('BUCKET_NAME')
 
 
-class Detect_Filters:
+class UPLOAS_TO_S3:
 
     def __init__(self, photo_path):
         self.photo_path = photo_path
@@ -48,7 +48,6 @@ class Detect_Filters:
         # Rename the file
         new_photo_path = os.path.join(os.path.dirname(photo_path), new_file_name.lstrip("/"))
         os.rename(photo_path, new_photo_path)
-
         return new_photo_path, new_file_name
 
     def ensure_s3_directory_exists(self, bucket, directory):
