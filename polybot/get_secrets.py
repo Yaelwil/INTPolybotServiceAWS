@@ -1,37 +1,32 @@
 import boto3
-import logging
-import os
-import json
-
-from botocore.exceptions import ClientError
-
-region_name = os.getenv('eu-west-2')
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)  # Configures logging to output to the console
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 
-class GetSecrets:
-    def get_secret(self):
+def get_secret(secret_name, region_name='eu-west-2'):
+    # Create a Secrets Manager client
+    client = boto3.client('secretsmanager', region_name=region_name)
 
-        secret_name = "TELEGRAM_TOKEN"
-
-        # Create a Secrets Manager client
-        session = boto3.session.Session()
-        client = session.client(
-            service_name='secretsmanager',
-            region_name=region_name
-        )
-
-        try:
-            get_secret_value_response = client.get_secret_value(
-                SecretId=secret_name
-            )
-        except ClientError as e:
-            # For a list of exceptions thrown, see
-            # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-            raise e
-
+    try:
+        # Retrieve the secret value
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
         secret = get_secret_value_response['SecretString']
+    except NoCredentialsError:
+        print("Credentials not available")
+        return None
+    except PartialCredentialsError:
+        print("Incomplete credentials")
+        return None
+    except NoRegionError:
+        print("AWS region not specified")
+        return None
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'ResourceNotFoundException':
+            print(f"Secret {secret_name} not found in AWS Secrets Manager")
+        else:
+            print(f"Error retrieving secret {secret_name}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error retrieving secret {secret_name}: {e}")
+        return None
 
-        return json.loads(secret)
+    return secret

@@ -1,24 +1,33 @@
 import json
-
 import flask
 from flask import request, jsonify
-import os
-from bot import ObjectDetectionBot
-from get_secrets import GetSecrets
 import boto3
+from bot import ObjectDetectionBot
+from get_secrets import get_secret
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 app = flask.Flask(__name__)
 
-# TODO load TELEGRAM_TOKEN value from Secret Manager
-# Create an instance of GetSecrets
-secrets_loader = GetSecrets()
+# Load TELEGRAM_TOKEN value from Secret Manager
+secret_name = "TELEGRAM_TOKEN"
+secret_value = get_secret(secret_name)
 
-# Retrieve TELEGRAM_TOKEN from Secrets Manager
-TELEGRAM_TOKEN = secrets_loader.get_secret()
+if secret_value:
+    TELEGRAM_TOKEN = json.loads(secret_value)['TELEGRAM_TOKEN']
+    print(f"Retrieved TELEGRAM_TOKEN from Secrets Manager")
+else:
+    print(f"Failed to retrieve secret {secret_name} from Secrets Manager")
+    TELEGRAM_TOKEN = None  # Handle this case based on your application's needs
 
-TELEGRAM_APP_URL = os.getenv('TELEGRAM_APP_URL')
-region_name = os.getenv('REGION_NAME')
-DYNAMODB_TABLE_NAME = os.getenv('DYNAMODB_TABLE_NAME')
+TELEGRAM_APP_URL = "yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com"
+REGION = "eu-west-2"
+DYNAMODB_TABLE_NAME = "yaelwil-dynamodb-aws-project"
+
+print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
+
+# Initialize bot outside of __main__ block
+bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -32,20 +41,17 @@ def webhook():
     return 'Ok'
 
 
-@app.route(f'/results', methods=['POST'])
+@app.route('/results', methods=['POST'])
 def results():
     prediction_id = request.args.get('predictionId')
 
-    # TODO use the prediction_id to retrieve results from DynamoDB and send to the end-user
-
+    # Use the prediction_id to retrieve results from DynamoDB and send to the end-user
     try:
-        dynamodb = boto3.resource('dynamodb', region_name)
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
         table = dynamodb.Table(DYNAMODB_TABLE_NAME)
     except Exception as e:
         return jsonify({'error': f'Error connecting to DynamoDB: {str(e)}'}), 500
 
-    # Get the predictionId from the request
-    prediction_id = request.args.get('predictionId')
     if not prediction_id:
         return jsonify({'error': 'Missing predictionId'}), 400
 
@@ -80,20 +86,17 @@ def results():
     return jsonify({'status': 'Ok'}), 200
 
 
-@app.route(f'/loadTest/', methods=['POST'])
+@app.route('/loadTest/', methods=['POST'])
 def load_test():
     req = request.get_json()
     bot.handle_message(req['message'])
     return 'Ok'
 
 
-# Route for health checks
 @app.route('/health_checks/', methods=['GET'])
 def health_checks():
-    return 200
+    return 'Ok', 200
 
 
 if __name__ == "__main__":
-    bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
-
     app.run(host='0.0.0.0', port=8443)
