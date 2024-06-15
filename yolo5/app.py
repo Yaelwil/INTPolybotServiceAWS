@@ -1,40 +1,59 @@
+import json
 import time
 from pathlib import Path
+import boto3
+import requests
 from detect import run
+import uuid
 import yaml
 from loguru import logger
 import os
-import boto3
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 images_bucket = os.environ['BUCKET_NAME']
 queue_name = os.environ['SQS_QUEUE_NAME']
 
-sqs_client = boto3.client('sqs', region_name='YOUR_REGION_HERE')
+sqs_client = boto3.client('sqs', region_name='eu-west-3')
 
 with open("data/coco128.yaml", "r") as stream:
     names = yaml.safe_load(stream)['names']
 
 
 def consume():
+    # The function runs in an infinite loop, continually polling the SQS queue for new messages.
     while True:
+        # Receive Message from SQS
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
-
+        # Check for Messages:
         if 'Messages' in response:
-            message = response['Messages'][0]['Body']
+            # Extract message details
+            message_body = response['Messages'][0]['Body']
             receipt_handle = response['Messages'][0]['ReceiptHandle']
-
-            # Use the ReceiptHandle as a prediction UUID
+            # Parses the message body from JSON format to a Python dictionary and retrieves the message ID
+            message = json.loads(message_body)
             prediction_id = response['Messages'][0]['MessageId']
+            logger.info(f'Prediction: {prediction_id}. Start processing')
 
-            logger.info(f'prediction: {prediction_id}. start processing')
+            # Retrieve Chat ID and Image Name
+            chat_id = message.get('chat_id')
+            img_name = message.get('file_name')
+            full_s3_path = message.get('s3_key')
+            if not img_name or not chat_id or not full_s3_path:
+                logger.error('Invalid message format: chat_id or file_name missing')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                continue
 
-            # Receives a URL parameter representing the image to download from S3
-            img_name = ...  # TODO extract from `message`
-            chat_id = ...  # TODO extract from `message`
-            original_img_path = ...  # TODO download img_name from S3, store the local image path in original_img_path
+            logger.info(f'img_name received: {img_name}')
+            # Download Image from S3
+            s3_client = boto3.client('s3')
+            s3_client.download_file(images_bucket, img_name, full_s3_path)
 
-            logger.info(f'prediction: {prediction_id}/{original_img_path}. Download img completed')
-
+            original_img_path = img_name
+            logger.info(f'Prediction: {prediction_id}/{original_img_path}. Download img completed')
+            # Run YOLOv5 Object Detection
             # Predicts the objects in the image
             run(
                 weights='yolov5s.pt',
@@ -45,16 +64,18 @@ def consume():
                 save_txt=True
             )
 
-            logger.info(f'prediction: {prediction_id}/{original_img_path}. done')
+            logger.info(f'Prediction: {prediction_id}/{original_img_path}. done')
 
-            # This is the path for the predicted image with labels
-            # The predicted image typically includes bounding boxes drawn around the detected objects, along with class labels and possibly confidence scores.
+            # Path for the predicted image with labels
             predicted_img_path = Path(f'static/data/{prediction_id}/{original_img_path}')
+            predicted_img_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # TODO Uploads the predicted image (predicted_img_path) to S3 (be careful not to override the original image).
+            # Upload predicted image to S3
+            unique_filename = str(uuid.uuid4()) + '.jpeg'
+            s3_client.upload_file(str(predicted_img_path), images_bucket, unique_filename)
 
             # Parse prediction labels and create a summary
-            pred_summary_path = Path(f'static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
+            pred_summary_path = Path(f'static/data/{prediction_id}/labels/{original_img_path.split("/")[-1].split(".")[0]}.txt')
             if pred_summary_path.exists():
                 with open(pred_summary_path) as f:
                     labels = f.read().splitlines()
@@ -66,19 +87,33 @@ def consume():
                         'width': float(l[3]),
                         'height': float(l[4]),
                     } for l in labels]
+                    logger.info(f'Prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
+                    prediction_summary = {
+                        'prediction_id': prediction_id,
+                        'original_img_path': original_img_path,
+                        'predicted_img_path': unique_filename,
+                        'labels': labels,
+                        'time': time.time()
+                    }
 
-                logger.info(f'prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
+                    # Store the prediction_summary in a DynamoDB table
+                    dynamodb = boto3.resource('dynamodb', region_name='eu-west-3')
+                    table = dynamodb.Table('galgu-PolybotService-DynamoDB')
+                    table.put_item(Item=prediction_summary)
 
-                prediction_summary = {
-                    'prediction_id': prediction_id,
-                    'original_img_path': original_img_path,
-                    'predicted_img_path': predicted_img_path,
-                    'labels': labels,
-                    'time': time.time()
-                }
-
-                # TODO store the prediction_summary in a DynamoDB table
-                # TODO perform a GET request to Polybot to `/results` endpoint
+                    # Notify Polybot of Results
+                    polybot_url = 'http://polybot-url/results'
+                    response = requests.get(polybot_url, params={
+                        'predictionId': json.dumps({'chat_id': chat_id, 'prediction_id': prediction_id})})
+                    if response.status_code == 200:
+                        logger.info('GET request to Polybot /results endpoint successful')
+                    else:
+                        logger.error(
+                            f'Error: GET request to Polybot /results endpoint failed with status code {response.status_code}')
+            else:
+                logger.error(f'Prediction: {prediction_id}/{original_img_path}. prediction result not found')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                continue
 
             # Delete the message from the queue as the job is considered as DONE
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)

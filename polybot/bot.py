@@ -137,8 +137,9 @@ class ObjectDetectionBot(Bot):
                         'segment' in photo_caption or
                         'random color' in photo_caption or
                         'predict' in photo_caption):
-                    self.upload_to_s3(photo_path)
-                    self.send_sqs_queue(photo_caption)
+                    chat_id = msg['chat']['id']
+                    s3_key, file_name = self.upload_to_s3(photo_path)
+                    self.send_sqs_queue(chat_id, photo_caption, s3_key, file_name)
                     self.send_text(msg['chat']['id'], "Your image is being processed. Please wait...")
                 else:
                     # If no specific filter is mentioned, respond with a default message
@@ -158,17 +159,18 @@ class ObjectDetectionBot(Bot):
         try:
             s3_uploader = UPLOAS_TO_S3(photo_path)
             new_photo_path, new_file_name = s3_uploader.rename_photo_with_timestamp(photo_path)
-            s3_key = s3_uploader.upload_photo_to_s3(new_photo_path)
+            s3_key, filename = s3_uploader.upload_photo_to_s3(new_photo_path)
             if s3_key:
                 logger.info(f"Successfully uploaded photo to S3 with key: {s3_key}")
+                return s3_key, filename
             else:
                 logger.error("Failed to upload photo to S3.")
         except Exception as e:
             logger.error(f"Error uploading photo to S3: {e}")
 
-    def send_sqs_queue(self, photo_caption):
+    def send_sqs_queue(self, chat_id, photo_caption, s3_key, file_name):
         try:
             sqs_sender = SqsQueue()
-            sqs_sender.send_sqs_queue(photo_caption)
+            sqs_sender.send_sqs_queue(chat_id, photo_caption, s3_key, file_name)
         except Exception as e:
             logger.error(f"Error sending message to SQS queue: {e}")

@@ -99,4 +99,4 @@ class UPLOAS_TO_S3:
         self.s3.upload_file(photo_path, images_bucket, s3_key)
 
         # Return the S3 key
-        return s3_key
+        return s3_key, filename
