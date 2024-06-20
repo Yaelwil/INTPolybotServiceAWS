@@ -11,7 +11,7 @@ from responses import load_responses
 
 class Bot:
 
-    def __init__(self, token, telegram_chat_url):
+    def __init__(self, token, telegram_chat_url, domain_certificate_file):
         # create a new instance of the TeleBot class.
         # all communication with Telegram servers are done using self.telegram_bot_client
         self.telegram_bot_client = telebot.TeleBot(token)
@@ -21,8 +21,9 @@ class Bot:
         time.sleep(0.5)
 
         # set the webhook URL
-        self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60)
-
+        with open(domain_certificate_file, 'rb') as cert:
+            self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', certificate=cert, timeout=60)
+        # self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60)
         logger.info(f'Telegram Bot information\n\n{self.telegram_bot_client.get_me()}')
         self.responses = load_responses()
 
@@ -120,8 +121,8 @@ class Bot:
 
 class ObjectDetectionBot(Bot):
 
-    def __init__(self, token, telegram_chat_url):
-        super().__init__(token, telegram_chat_url)
+    def __init__(self, token, telegram_chat_url, domain_certificate_file):
+        super().__init__(token, telegram_chat_url, domain_certificate_file)
         self.responses = load_responses()
 
     def handle_message(self, msg):
@@ -140,7 +141,10 @@ class ObjectDetectionBot(Bot):
                     chat_id = msg['chat']['id']
                     s3_key, file_name = self.upload_to_s3(photo_path)
                     self.send_sqs_queue(chat_id, photo_caption, s3_key, file_name)
-                    self.send_text(msg['chat']['id'], "Your image is being processed. Please wait...")
+                    if self.send_sqs_queue:
+                        self.send_text(msg['chat']['id'], "Your image is being processed. Please wait...")
+                    else:
+                        self.send_text(msg['chat']['id'], "there was an error, please try again")
                 else:
                     # If no specific filter is mentioned, respond with a default message
                     default_response = random.choice(self.responses['default'])

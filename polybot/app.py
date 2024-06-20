@@ -1,4 +1,6 @@
 import json
+import os
+from loguru import logger
 import flask
 from flask import request, jsonify
 import boto3
@@ -9,24 +11,35 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoR
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
-secret_name = "TELEGRAM_TOKEN"
-secret_value = get_secret(secret_name)
+secret_name_TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
+secret_name_DOMAIN_CERTIFICATE = "DOMAIN_CERTIFICATE"
+secret_value_TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
+secret_value_DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
-if secret_value:
-    TELEGRAM_TOKEN = json.loads(secret_value)['TELEGRAM_TOKEN']
-    print(f"Retrieved TELEGRAM_TOKEN from Secrets Manager")
+if secret_value_TELEGRAM_TOKEN and secret_value_DOMAIN_CERTIFICATE :
+    TELEGRAM_TOKEN = json.loads(secret_value_TELEGRAM_TOKEN)['TELEGRAM_TOKEN']
+    DOMAIN_CERTIFICATE = json.loads(secret_value_DOMAIN_CERTIFICATE)['DOMAIN_CERTIFICATE']
+
+    logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
-    print(f"Failed to retrieve secret {secret_name} from Secrets Manager")
-    TELEGRAM_TOKEN = None  # Handle this case based on your application's needs
+    raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
 
-TELEGRAM_APP_URL = "yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com"
-REGION = "eu-west-2"
-DYNAMODB_TABLE_NAME = "yaelwil-dynamodb-aws-project"
+# TELEGRAM_APP_URL = "yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com"c
+TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
+REGION = os.environ["REGION"]
+DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
 
+domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
+
+with open(domain_certificate_file, 'w') as file:
+    file.write(DOMAIN_CERTIFICATE)
+
+logger.info('Created certificate file successfully')
+
 # Initialize bot outside of __main__ block
-bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
+bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, domain_certificate_file)
 
 
 @app.route('/', methods=['GET'])

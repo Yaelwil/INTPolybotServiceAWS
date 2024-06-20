@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import boto3
 
-images_bucket = os.getenv('BUCKET_NAME')
+images_bucket = os.environ["BUCKET_NAME"]
 
 
 class UPLOAS_TO_S3:
