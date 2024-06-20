@@ -12,13 +12,12 @@ app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
 secret_name_TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
-secret_name_DOMAIN_CERTIFICATE = "DOMAIN_CERTIFICATE"
+secret_name_DOMAIN_CERTIFICATE = "CERTIFICATE"
 secret_value_TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
-secret_value_DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
+DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
-if secret_value_TELEGRAM_TOKEN and secret_value_DOMAIN_CERTIFICATE :
+if secret_value_TELEGRAM_TOKEN and DOMAIN_CERTIFICATE :
     TELEGRAM_TOKEN = json.loads(secret_value_TELEGRAM_TOKEN)['TELEGRAM_TOKEN']
-    DOMAIN_CERTIFICATE = json.loads(secret_value_DOMAIN_CERTIFICATE)['DOMAIN_CERTIFICATE']
 
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
