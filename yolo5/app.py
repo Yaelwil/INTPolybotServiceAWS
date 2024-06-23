@@ -15,7 +15,7 @@ images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["YOLO_QUEUE_NAME"]
 region = os.environ["REGION"]
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
-polybot_url = os.environ["POLYBOT_URL"]
+alb_url = os.environ["ALB_URL"]
 
 # Initialize SQS client, bucket and DynamoDB table
 sqs_client = boto3.client('sqs', region_name=region)
@@ -54,8 +54,7 @@ def consume():
                 continue
 
             logger.info(f'img_name received: {img_name}')
-            s3_client = boto3.client('s3')
-            s3_client.download_file(images_bucket, full_s3_path, img_name)
+            s3.download_file(images_bucket, full_s3_path, img_name)
             original_img_path = img_name
             logger.info(f'prediction: {prediction_id}/{original_img_path}. Download img completed')
 
@@ -126,16 +125,15 @@ def consume():
                 s3.upload_file(json_file_path, images_bucket, json_full_path)
                 logger.info('Upload successfully the results to S3')
 
-                # Store the prediction summary in DynamoDB with chat_id as primary key
-                dynamodb_table.put_item(Item={
-                    'chat_id': chat_id,
-                    'prediction_summary': prediction_summary
-                })
-                logger.info(f'Stored prediction summary for chat_id {chat_id} in DynamoDB')
+                # TODO store the prediction_summary in a DynamoDB table
 
+                # TODO perform a GET request to Polybot to `/results` endpoint
+                endpoint_path = '/results'
+                url = alb_url + endpoint_path
 
             # Delete the message from the queue after processing
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+
 
 if __name__ == "__main__":
     consume()
