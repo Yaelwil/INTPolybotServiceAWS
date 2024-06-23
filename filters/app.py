@@ -12,52 +12,57 @@ region = os.environ["REGION"]
 
 # Initialize SQS client, S3 client resources
 sqs_client = boto3.client('sqs', region_name=region)
-s3_client = boto3.client('s3')
+s3 = boto3.client('s3')
 
 def consume():
     while True:
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
+
         if 'Messages' in response:
-            message = response['Messages'][0]
-            prediction_id = message['MessageId']
-            chat_id = response['MessageId']['Body'][1]
-            # photo_caption = message['photo_caption']
-            # s3_key = message['s3_key']
-            # file_name = message['file_name']
+            message_body = response['Messages'][0]['Body']
+            receipt_handle = response['Messages'][0]['ReceiptHandle']
+            prediction_id = response['Messages'][0]['MessageId']
 
-            # Print keys present in the message
-            logger.info(f'Keys present in the message: {message.keys()}')
-            logger.info(f'prediction_id: {prediction_id}')
+            logger.info(f'Raw message body: {message_body}')
+
+            try:
+                # Split the message body by commas and extract the relevant fields
+                chat_id, photo_caption, full_s3_path, img_name = message_body.split(', ')
+            except ValueError as e:
+                logger.error(f"Error parsing message body: {e}")
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                continue
+
+            logger.info(f'Prediction: {prediction_id}. Start processing')
+
+            if not img_name or not chat_id or not full_s3_path:
+                logger.error('Invalid message format: chat_id, file_name, or s3_key missing')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                continue
+
             logger.info(f'chat_id: {chat_id}')
+            logger.info(f'photo_caption: {photo_caption}')
+            logger.info(f'full_s3_path: {full_s3_path}')
+            logger.info(f'img_name: {img_name}')
 
+            s3.download_file(images_bucket, full_s3_path, img_name)
+            logger.error(f'Download the photo: {img_name} successfully')
 
+            # Create a Filters object and process the image
+            filters = Filters(photo_caption, img_name)
+            processed_img_path, filter_name = filters.image_processing()
 
-            # logger.info(f'message: {message}')
-            # logger.info(f'prediction_id: {prediction_id}')
-            # logger.info(f'chat_id: {chat_id}')
-            # logger.info(f'photo_caption: {photo_caption}')
-            # logger.info(f's3_key: {s3_key}')
-            # logger.info(f'file_name: {file_name}')
+            logger.info(f'Processed image path: {processed_img_path}, Filter applied: {filter_name}')
 
-            # try:
-            #     # Extract message body fields
-            #     chat_id, photo_caption, s3_key, file_name = message['Body'].split(', ')
-            #     logger.info(f'Received message: Prediction ID: {prediction_id}, Chat ID: {chat_id}, Caption: {photo_caption}, Image: {img_name}')
-            #
-            # except ValueError as e:
-            #     logger.error(f"Error parsing message body: {e}")
-            #
-            # except Exception as e:
-            #     logger.error(f"Error processing message: {e}")
-            #     continue
+            s3_directory = 'filters/'
+            full_name_s3 = str(s3_directory) + str(processed_img_path)
 
-            # # Delete processed message from SQS queue
-            # sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
-            # logger.info(f'Deleted message from SQS queue. Prediction ID: {prediction_id}')
+            s3.upload_file(processed_img_path, images_bucket, full_name_s3)
 
-        # else:
-        #     logger.info('No messages received')
-        # time.sleep(1)
+            logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
+
+            sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+
 
 if __name__ == "__main__":
     consume()

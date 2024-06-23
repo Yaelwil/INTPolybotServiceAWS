@@ -40,8 +40,7 @@ class Filters:
         return self.apply_filter(Img.random_colors, 'Random Colors')
 
     def apply_filter(self, filter_func, filter_name):
-        img_instance = Img(self.img_path)
+        img_instance = Img(self.img_path, self.photo_caption)
         filter_func(img_instance)  # Call the provided filter function
-        processed_img_path = img_instance.save_img()
-
+        processed_img_path = img_instance.save_img(self.photo_caption)
         return processed_img_path, filter_name

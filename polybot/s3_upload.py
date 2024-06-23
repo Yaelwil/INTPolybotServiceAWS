@@ -82,11 +82,13 @@ class UPLOAS_TO_S3:
         # Specify the directory path in the bucket
         s3_directory_path = 'photos'
         s3_predicted_directory_path = 'predicted_photos'
+        s3_other_filters_directory_path = 'filtered_photos'
         s3_json_folder = 'json'
 
         # Ensure the directory exists in the S3 bucket
         self.ensure_s3_directory_exists(images_bucket, s3_directory_path)
         self.ensure_s3_directory_exists(images_bucket, s3_predicted_directory_path)
+        self.ensure_s3_directory_exists(images_bucket, s3_other_filters_directory_path)
         self.ensure_s3_directory_exists(images_bucket, s3_json_folder)
 
         # Extract filename from the path

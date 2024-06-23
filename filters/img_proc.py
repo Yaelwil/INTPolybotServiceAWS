@@ -12,19 +12,20 @@ def rgb2gray(rgb):
 
 class Img:
 
-    def __init__(self, path):
+    def __init__(self, path, photo_caption):
         """
         Do not change the constructor implementation
         """
         self.path = Path(path)
         self.data = rgb2gray(imread(path)).tolist()
+        self.photo_caption = photo_caption
         self.info = self.calculate_image_info()
 
-    def save_img(self):
+    def save_img(self, photo_caption):
         """
         Do not change the below implementation
         """
-        new_path = self.path.with_name(self.path.stem + '_filtered' + self.path.suffix)
+        new_path = self.path.with_name(self.path.stem + '-' + photo_caption + self.path.suffix)
         imsave(new_path, self.data, cmap='gray')
         return new_path
 
