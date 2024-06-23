@@ -132,7 +132,6 @@ def consume():
                     logger.error(f'Failed to upload JSON file to S3: {e}')
 
                 # TODO store the prediction_summary in a DynamoDB table
-
                 # TODO perform a GET request to Polybot to `/results` endpoint
                 # endpoint_path = '/results'
                 # url = alb_url + endpoint_path

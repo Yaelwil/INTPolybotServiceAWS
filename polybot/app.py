@@ -87,7 +87,6 @@ def results():
             return jsonify({'error': 'No results found in the item'}), 404
     except Exception as e:
         return jsonify({'error': f'Error retrieving results: {str(e)}'}), 500
-
     # Send results to the end-user via Telegram
     try:
         bot.send_text(chat_id, text_results)
