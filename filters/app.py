@@ -57,6 +57,7 @@ def consume():
             s3_directory = 'filters/'
             full_name_s3 = str(s3_directory) + str(processed_img_path)
             s3.upload_file(processed_img_path, images_bucket, full_name_s3)
+
             logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
 
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)

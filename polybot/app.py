@@ -62,7 +62,6 @@ def results():
         table = dynamodb.Table(DYNAMODB_TABLE_NAME)
     except Exception as e:
         return jsonify({'error': f'Error connecting to DynamoDB: {str(e)}'}), 500
-
     if not prediction_id:
         return jsonify({'error': 'Missing predictionId'}), 400
 

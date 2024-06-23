@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  FiltersBuild:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code

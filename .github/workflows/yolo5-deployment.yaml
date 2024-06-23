@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  Yolov5Build:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo code
