@@ -1,9 +1,9 @@
-name: Polybot Microservice Deployment
+name: Yolo5 Microservice Deployment
 
 on:
   push:
     paths:
-      - 'polybot/**'
+      - 'filters/**'
     branches:
       - main
 
@@ -16,14 +16,14 @@ jobs:
 
       - name: Build and push image
         run: |
-          cd polybot
+          cd filters
           
           # Login to DockerHub:         
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
-          POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:${{ github.run_number }}
-          docker build -t $POLYBOT_IMAGE_NAME .
-          docker push $POLYBOT_IMAGE_NAME
+          FILTERS_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:${{ github.run_number }}
+          docker build -t $FILTERS_IMAGE_NAME .
+          docker push $FILTERS_IMAGE_NAME       
 
   Deploy:
     runs-on: ubuntu-latest

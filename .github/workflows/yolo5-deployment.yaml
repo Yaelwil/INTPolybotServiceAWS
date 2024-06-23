@@ -18,7 +18,12 @@ jobs:
         run: |
           cd yolo5
           
-          # TODO your implementation here....          
+          # Login to DockerHub:         
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/yolov5:${{ github.run_number }}
+          docker build -t $YOLOV5_IMAGE_NAME .
+          docker push $YOLOV5_IMAGE_NAME     
 
   Deploy:
     runs-on: ubuntu-latest
