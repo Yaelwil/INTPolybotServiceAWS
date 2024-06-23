@@ -1,15 +1,21 @@
 import boto3
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)  # Configures logging to output to the console
 
+region = os.environ["REGION"]
+yolo_queue_name = os.environ["YOLO_QUEUE_NAME"]
+filters_queue_name = os.environ["FILTERS_QUEUE_NAME"]
+
+
 
 class SqsQueue:
     def __init__(self):
-        self.sqs_client = boto3.client('sqs', region_name='eu-west-2')
-        self.FILTERS_QUEUE_URL = "https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo"
-        self.YOLOV5_QUEUE_URL = "https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo"
+        self.sqs_client = boto3.client('sqs', region_name=region)
+        self.FILTERS_QUEUE_URL = filters_queue_name
+        self.YOLOV5_QUEUE_URL = yolo_queue_name
 
     def send_sqs_queue(self, chat_id, photo_caption, s3_key, file_name):
         try:
