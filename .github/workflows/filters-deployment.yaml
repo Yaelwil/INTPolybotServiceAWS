@@ -1,4 +1,4 @@
-name: Yolo5 Microservice Deployment
+name: Filters Microservice Deployment
 
 on:
   push:
