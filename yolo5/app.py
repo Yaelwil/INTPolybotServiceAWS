@@ -1,6 +1,6 @@
 import time
 from pathlib import Path
-from detect import run
+from detect import run  # Ensure detect.py is in your working directory and contains the run function
 import yaml
 from loguru import logger
 import os
@@ -8,6 +8,7 @@ import boto3
 import requests
 import json
 import uuid
+from decimal import Decimal, ROUND_HALF_UP
 
 # Load environment variables
 images_bucket = os.environ["BUCKET_NAME"]
@@ -16,8 +17,11 @@ region = os.environ["REGION"]
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
 polybot_url = os.environ["POLYBOT_URL"]
 
-# Initialize SQS client
+# Initialize SQS client, bucket and DynamoDB table
 sqs_client = boto3.client('sqs', region_name=region)
+s3 = boto3.client('s3')
+dynamodb = boto3.resource('dynamodb', region_name=region)
+dynamodb_table = dynamodb.Table(dynamodb_table_name)
 
 # Load class names from coco128.yaml
 with open("data/coco128.yaml", "r") as stream:
@@ -52,10 +56,12 @@ def consume():
             logger.info(f'img_name received: {img_name}')
             s3_client = boto3.client('s3')
             s3_client.download_file(images_bucket, full_s3_path, img_name)
-
             original_img_path = img_name
-            logger.info(f'Prediction: {prediction_id}/{original_img_path}. Download img completed')
+            logger.info(f'prediction: {prediction_id}/{original_img_path}. Download img completed')
 
+            logger.info(f'chat_id: {chat_id}, predict: {predict}, full_s3_path: {full_s3_path}, img_name: {img_name}, original_img_path: {original_img_path}')
+
+            # Predicts the objects in the image
             run(
                 weights='yolov5s.pt',
                 data='data/coco128.yaml',
@@ -65,14 +71,25 @@ def consume():
                 save_txt=True
             )
 
-            logger.info(f'Prediction: {prediction_id}/{original_img_path}. done')
+            logger.info(f'prediction: {prediction_id}/{original_img_path}. done')
 
+            # This is the path for the predicted image with labels
             predicted_img_path = Path(f'static/data/{prediction_id}/{original_img_path}')
-            predicted_img_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(f'predicted_img_path: {predicted_img_path}')
 
-            unique_filename = str(uuid.uuid4()) + '.jpeg'
-            s3_client.upload_file(str(predicted_img_path), images_bucket, unique_filename)
+            # Combine the base name and the file extension
+            base_name, file_extension = os.path.splitext(os.path.basename(original_img_path))
+            new_file_name = f"{base_name}-predict{file_extension}"
+            # new folder in S3
+            s3_predicted_directory_path = 'predicted_photos/'
+            # full name in S3
+            full_name_s3 = s3_predicted_directory_path + new_file_name
 
+            # Upload the predicted image to S3
+            s3.upload_file(str(predicted_img_path), images_bucket, full_name_s3)
+            logger.info(f'prediction: {new_file_name}. was uploaded to s3 successfully')
+
+            # Parse prediction labels and create a summary
             pred_summary_path = Path(f'static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
             if pred_summary_path.exists():
                 with open(pred_summary_path) as f:
@@ -86,33 +103,38 @@ def consume():
                         'height': float(l[4]),
                     } for l in labels]
 
-                logger.info(f'Prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
+                logger.info(f'prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
 
                 prediction_summary = {
                     'prediction_id': prediction_id,
                     'original_img_path': original_img_path,
-                    'predicted_img_path': unique_filename,
+                    'predicted_img_path': str(predicted_img_path),
                     'labels': labels,
                     'time': time.time()
                 }
 
-                dynamodb = boto3.resource('dynamodb', region_name=region)
-                table = dynamodb.Table(dynamodb_table_name)
-                table.put_item(Item=prediction_summary)
+                # Define the path where you want to save the JSON file
+                json_file_path = f'{base_name}.json'
+                # Write the prediction summary to a JSON file
+                with open(json_file_path, 'w') as json_file:
+                    json.dump(prediction_summary, json_file)
+                logger.info(f'json_file_path: {json_file_path}')
+                # Upload json file to S3
+                json_folder_path = "json"
+                json_full_path = f'{json_folder_path}/{json_file_path}'
+                logger.info(f'json directory path: {json_full_path}')
+                s3.upload_file(json_file_path, images_bucket, json_full_path)
+                logger.info('Upload successfully the results to S3')
 
-                polybot_url_results = f'{polybot_url}/results'
-                response = requests.get(polybot_url_results, params={
-                    'predictionId': json.dumps({'chat_id': chat_id, 'prediction_id': prediction_id})
+                # Store the prediction summary in DynamoDB with chat_id as primary key
+                dynamodb_table.put_item(Item={
+                    'chat_id': chat_id,
+                    'prediction_summary': prediction_summary
                 })
-                if response.status_code == 200:
-                    logger.info('GET request to Polybot /results endpoint successful')
-                else:
-                    logger.error(
-                        f'Error: GET request to Polybot /results endpoint failed with status code {response.status_code}')
+                logger.info(f'Stored prediction summary for chat_id {chat_id} in DynamoDB')
 
-            else:
-                logger.error(f'Prediction: {prediction_id}/{original_img_path}. prediction result not found')
 
+            # Delete the message from the queue after processing
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
 
 if __name__ == "__main__":
