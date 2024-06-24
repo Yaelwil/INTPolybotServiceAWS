@@ -35,9 +35,15 @@ jobs:
       - name: Checkout the repo code
         uses: actions/checkout@v2
 
+      - name: Assume AWS IAM Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/YourIAMRole
+          role-session-name: GitHubActionsDeploy
+
       - name: Fetch EC2 Instance IP Addresses
         run: |
-          EC2_POLYBOT_IP_ADDRESSES=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
+          EC2_POLYBOT_IP_ADDRESSES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
           echo "Deploying to IP addresses: $EC2_POLYBOT_IP_ADDRESSES"
 
       - name: Copy .env file to EC2 instances
@@ -57,15 +63,20 @@ jobs:
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
 
           # SSH into each instance and deploy the new Docker image
-          IFS=$'\n'       # Set delimiter to newline
+          IFS=$'\n'
           for IP in $EC2_POLYBOT_IP_ADDRESSES; do
             echo "Deploying to $IP"
 
             # SSH into the instance
             ssh -o StrictHostKeyChecking=no ec2-user@$IP << EOF
+              # Pull the latest Docker image
               docker pull $POLYBOT_IMAGE_NAME
-              docker stop polybot || true    # Stop the existing container if running
-              docker rm polybot || true      # Remove the existing container if exists
-              docker run -d -p 8443:8443 --name polybot -t $POLYBOT_IMAGE_NAME
+
+              # Stop and remove the existing container if running
+              docker stop polybot || true
+              docker rm polybot || true
+
+              # Run the new Docker container with .env file and auto-restart
+              docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ec2-user/polybot/.env $POLYBOT_IMAGE_NAME
             EOF
           done

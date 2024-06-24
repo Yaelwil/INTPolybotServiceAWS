@@ -1,6 +1,7 @@
 import time
 import os
 import boto3
+import requests
 from loguru import logger
 from filters import Filters
 from img_proc import Img
@@ -9,6 +10,7 @@ from img_proc import Img
 images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["FILTERS_QUEUE_NAME"]
 region = os.environ["REGION"]
+alb_url = os.environ["ALB_URL"]
 
 # Initialize SQS client, S3 client resources
 sqs_client = boto3.client('sqs', region_name=region)
@@ -61,8 +63,25 @@ def consume():
             logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
 
             # TODO send a request to the ALB with the relevant details
+            if not alb_url:
+                raise ValueError("ALB_URL environment variable is not set.")
+
+            try:
+                params = {
+                    "full_s3_path": full_s3_path,
+                    "img_name": img_name
+                }
+
+                response = requests.get(alb_url, params=params)
+                response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
+                print("Request successful.")
+                print("Response status code:", response.status_code)
+                print("Response body:", response.text)
+            except requests.exceptions.RequestException as e:
+                print("Request to ALB failed:", e)
 
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+            logger.info('The message was deleted from the queue')
 
 
 if __name__ == "__main__":
