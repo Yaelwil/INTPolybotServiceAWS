@@ -158,10 +158,9 @@ def consume():
                     # perform a GET request to Polybot to /results endpoint
                     requests.post(f"{alb_url}/results_predict?predictionId={prediction_id}")
 
+                    logger.info(f"{response}")
                     # Check if the request was successful (status code 200)
-                    if response.status_code == 200:
-                        results = response.json()  # Assuming the response is JSON
-                        print("Received results:", results)
+                    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
                         logger.info("Received results")
 
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)

@@ -54,37 +54,38 @@ def webhook():
     bot.handle_message(req['message'])
     return 'Ok'
 
+
 @app.route('/results_predict', methods=['POST'])
 def results_predict():
+    logger.info('Received request from yolov5')
+
+    # try:
+    prediction_id = request.args.get('predictionId')
+
+    if not prediction_id:
+        return jsonify({'error': 'Missing predictionId'}), 400
+
+    # Initialize RESULTS class
+    results_handler = RESULTS(REGION, DYNAMODB_TABLE_NAME)
+
+    # Call results_predict method from RESULTS class with prediction_id
+    prediction_result = results_handler.results_predict(prediction_id)
+
+    # Extract relevant information from the prediction result
+    chat_id = prediction_result.get('chat_id')
+    text_results = prediction_result.get('text_results')
+
+    # Send results to the end-user via Telegram
     try:
-        # Initialize RESULTS handler
-        results_handler = RESULTS(REGION, DYNAMODB_TABLE_NAME)
-
-        # Assuming JSON payload with predictionId in the request body
-        data = request.json
-        prediction_id = data.get('predictionId')
-
-        if not prediction_id:
-            return jsonify({'error': 'Missing predictionId'}), 400
-
-        # Call results_predict method from RESULTS class with prediction_id
-        prediction_result = results_handler.results_predict(prediction_id)
-
-        # Extract relevant information from the prediction result
-        chat_id = prediction_result.get('chat_id')
-        text_results = prediction_result.get('text_results')
-
-        # Send results to the end-user via Telegram
-        try:
-            bot.send_text(chat_id, text_results)
-            logger.info('Successfully sent prediction results to Telegram')
-        except Exception as e:
-            return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
-
-        return jsonify({'status': 'Ok'}), 200
-
+        bot.send_text(chat_id, text_results)
+        logger.info('Successfully sent prediction results to Telegram')
     except Exception as e:
-        return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
+        return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
+
+    return jsonify({'status': 'Ok'}), 200
+
+    # except Exception as e:
+    #     return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
 
 
 @app.route('/results_filter', methods=['POST'])

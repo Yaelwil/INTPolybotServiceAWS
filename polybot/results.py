@@ -5,12 +5,11 @@ from loguru import logger
 
 
 class RESULTS:
-    def __init__(self, region, dynamodb_table_name, img_name):
+    def __init__(self, region, dynamodb_table_name):
         self.region = region
         self.dynamodb = boto3.resource('dynamodb', region_name=region)
         self.table = self.dynamodb.Table(dynamodb_table_name)
         self.s3 = boto3.client('s3')
-        self.img_name = img_name
 
     def results_predict(self, prediction_id):
 
