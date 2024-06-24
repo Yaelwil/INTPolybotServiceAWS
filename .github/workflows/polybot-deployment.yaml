@@ -35,12 +35,13 @@ jobs:
       - name: Checkout the repo code
         uses: actions/checkout@v2
 
-      - name: Set up AWS CLI
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
+          role-duration-seconds: 1200  # Optional: Set a role session duration if using temporary credentials
 
       - name: Fetch EC2 Instance IP Addresses
         run: |

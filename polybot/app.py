@@ -70,7 +70,6 @@ def results_predict():
 
     # Call results_predict method from RESULTS class with prediction_id
     prediction_result = results_handler.results_predict(prediction_id)
-
     logger.info(f'prediction_result:{prediction_result}')
 
     # Extract relevant information from the prediction result
