@@ -54,7 +54,7 @@ def consume():
 
             logger.info(f'Processed image path: {processed_img_path}, Filter applied: {filter_name}')
 
-            s3_directory = 'filters/'
+            s3_directory = 'filtered_photos/'
             full_name_s3 = str(s3_directory) + str(processed_img_path)
             s3.upload_file(processed_img_path, images_bucket, full_name_s3)
 

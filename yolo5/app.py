@@ -8,6 +8,8 @@ import boto3
 import requests
 import json
 import uuid
+from json_praising import PraisingJSON
+from dynamodb_save import store_results_in_dynamodb
 from decimal import Decimal, ROUND_HALF_UP
 
 # Load environment variables
@@ -15,7 +17,7 @@ images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["YOLO_QUEUE_NAME"]
 region = os.environ["REGION"]
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
-# alb_url = os.environ["ALB_URL"]
+alb_url = os.environ["ALB_URL"]
 
 # Initialize SQS client, bucket and DynamoDB table
 sqs_client = boto3.client('sqs', region_name=region)
@@ -131,14 +133,38 @@ def consume():
                 except Exception as e:
                     logger.error(f'Failed to upload JSON file to S3: {e}')
 
+                logger.info(f'json_file_path: {json_file_path}')
+
+                # Create a PraisingJSON object and process the image
+                JSON_praising = PraisingJSON(json_file_path)
+                formatted_json_file = JSON_praising.process_prediction_results(json_file_path)
+                logger.info(f'formatted_json_file: {formatted_json_file}')
+
                 # TODO store the prediction_summary in a DynamoDB table
+                if formatted_json_file:
+                    # Store the results in DynamoDB
+                    store_results_in_dynamodb(prediction_id, formatted_json_file, dynamodb_table_name, region)
+                else:
+                    logger.error('Formatted results are invalid or empty')
 
                 # TODO perform a GET request to Polybot to `/results` endpoint
-                # endpoint_path = '/results'
-                # url = alb_url + endpoint_path
+                endpoint_path = '/results'
+                url = alb_url + endpoint_path
 
-            # Delete the message from the queue after processing
-            sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                try:
+                    response = requests.get(url)
+
+                    # Check if the request was successful (status code 200)
+                    if response.status_code == 200:
+                        results = response.json()  # Assuming the response is JSON
+                        print("Received results:", results)
+                        sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                        logger.info('deleted the job from queue')
+                    else:
+                        print(f"Failed to retrieve results. Status code: {response.status_code}")
+
+                except requests.exceptions.RequestException as e:
+                    print(f"Error during GET request: {e}")
 
 
 if __name__ == "__main__":
