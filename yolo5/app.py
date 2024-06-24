@@ -152,14 +152,16 @@ def consume():
                 url = alb_url + endpoint_path
 
                 try:
-                    response = requests.get(url)
+                    # TODO send a request to the ALB with the relevant details
+                    logger.info(f"{alb_url}/results_predict?predictionId={prediction_id}")
+
+                    # perform a GET request to Polybot to /results endpoint
+                    requests.post(f"{alb_url}/results_predict?predictionId={prediction_id}")
 
                     # Check if the request was successful (status code 200)
                     if response.status_code == 200:
                         results = response.json()  # Assuming the response is JSON
                         print("Received results:", results)
-
-                        # TODO send a request to the ALB with the relevant details
 
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
                         logger.info('deleted the job from queue')

@@ -1,10 +1,8 @@
-import time
 import os
 import boto3
 import requests
 from loguru import logger
 from filters import Filters
-from img_proc import Img
 
 # Load environment variables
 images_bucket = os.environ["BUCKET_NAME"]
@@ -72,13 +70,14 @@ def consume():
                     "img_name": img_name
                 }
 
-                response = requests.get(alb_url, params=params)
-                response.raise_for_status()  # Raise an exception for HTTP errors (4xx or 5xx)
-                print("Request successful.")
-                print("Response status code:", response.status_code)
-                print("Response body:", response.text)
-            except requests.exceptions.RequestException as e:
-                print("Request to ALB failed:", e)
+                logger.info(f"http://{alb_url}/results_filter?predictionId={prediction_id}")
+
+                # perform a GET request to Polybot to /results endpoint
+                response = requests.post(f"http://{alb_url}/results_filter?predictionId={prediction_id}", json=params)
+                print(response.text)
+
+            except ValueError as e:
+                logger.error(f"Error sending post request: {e}")
 
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
             logger.info('The message was deleted from the queue')
