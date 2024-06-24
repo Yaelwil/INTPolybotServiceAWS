@@ -18,9 +18,10 @@ jobs:
         run: |
           cd polybot
           
-          # Login to DockerHub:         
+          # Login to DockerHub         
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
+          # Build and push Docker image
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
           docker build -t $POLYBOT_IMAGE_NAME .
           docker push $POLYBOT_IMAGE_NAME
@@ -33,7 +34,38 @@ jobs:
     steps:
       - name: Checkout the repo code
         uses: actions/checkout@v2
+
+      - name: Fetch EC2 Instance IP Addresses
+        run: |
+          EC2_POLYBOT_IP_ADDRESSES=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
+          echo "Deploying to IP addresses: $EC2_POLYBOT_IP_ADDRESSES"
+
+      - name: Copy .env file to EC2 instances
+        run: |
+          # Path to your .env file locally
+          ENV_FILE="./polybot/.env"
+
+          # Loop through each EC2 instance IP address
+          IFS=$'\n'
+          for IP in $EC2_POLYBOT_IP_ADDRESSES; do
+            echo "Copying .env file to $IP"
+            scp -o StrictHostKeyChecking=no -i /path/to/your-key.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env
+          done
+
       - name: Deploy new version
-        run: |         
-          # TODO your implementation here....     
-     
+        run: |
+          POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
+
+          # SSH into each instance and deploy the new Docker image
+          IFS=$'\n'       # Set delimiter to newline
+          for IP in $EC2_POLYBOT_IP_ADDRESSES; do
+            echo "Deploying to $IP"
+
+            # SSH into the instance
+            ssh -o StrictHostKeyChecking=no ec2-user@$IP << EOF
+              docker pull $POLYBOT_IMAGE_NAME
+              docker stop polybot || true    # Stop the existing container if running
+              docker rm polybot || true      # Remove the existing container if exists
+              docker run -d -p 8443:8443 --name polybot -t $POLYBOT_IMAGE_NAME
+            EOF
+          done
