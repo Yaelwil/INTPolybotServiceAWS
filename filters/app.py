@@ -46,7 +46,7 @@ def consume():
             logger.info(f'img_name: {img_name}')
 
             s3.download_file(images_bucket, full_s3_path, img_name)
-            logger.error(f'Download the photo: {img_name} successfully')
+            logger.info(f'Download the photo: {img_name} successfully')
 
             # Create a Filters object and process the image
             filters = Filters(photo_caption, img_name)
@@ -59,6 +59,8 @@ def consume():
             s3.upload_file(processed_img_path, images_bucket, full_name_s3)
 
             logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
+
+            # TODO send a request to the ALB with the relevant details
 
             sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
 

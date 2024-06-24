@@ -6,6 +6,7 @@ from flask import request, jsonify
 import boto3
 from bot import ObjectDetectionBot
 from get_secrets import get_secret
+from results import RESULTS
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 app = flask.Flask(__name__)
@@ -26,6 +27,7 @@ else:
 TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
+BUCKET_NAME = os.environ["BUCKET_NAME"]
 
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
 
@@ -51,48 +53,73 @@ def webhook():
     bot.handle_message(req['message'])
     return 'Ok'
 
-
-@app.route('/results', methods=['POST'])
-def results():
-    prediction_id = request.args.get('predictionId')
-
-    # Use the prediction_id to retrieve results from DynamoDB and send to the end-user
+@app.route('/results_predict', methods=['POST'])
+def results_predict():
     try:
-        dynamodb = boto3.resource('dynamodb', region_name=REGION)
-        table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+        # Initialize RESULTS handler
+        results_handler = RESULTS(REGION, DYNAMODB_TABLE_NAME)
+
+        # Assuming JSON payload with predictionId in the request body
+        data = request.json
+        prediction_id = data.get('predictionId')
+
+        if not prediction_id:
+            return jsonify({'error': 'Missing predictionId'}), 400
+
+        # Call results_predict method from RESULTS class with prediction_id
+        prediction_result = results_handler.results_predict(prediction_id)
+
+        # Extract relevant information from the prediction result
+        chat_id = prediction_result.get('chat_id')
+        text_results = prediction_result.get('text_results')
+
+        # Send results to the end-user via Telegram
+        try:
+            bot.send_text(chat_id, text_results)
+            logger.info('Successfully sent prediction results to Telegram')
+        except Exception as e:
+            return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
+
+        return jsonify({'status': 'Ok'}), 200
+
     except Exception as e:
-        return jsonify({'error': f'Error connecting to DynamoDB: {str(e)}'}), 500
-    if not prediction_id:
-        return jsonify({'error': 'Missing predictionId'}), 400
+        return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
 
-    # Extract chat_id from prediction_id (assuming prediction_id is a JSON string)
+
+@app.route('/results_filter', methods=['POST'])
+def results_filter():
     try:
-        prediction_data = json.loads(prediction_id)
-        chat_id = prediction_data.get("chat_id")
-        if not chat_id:
-            return jsonify({'error': 'Invalid chat_id'}), 400
-    except json.JSONDecodeError:
-        return jsonify({'error': 'Invalid predictionId format'}), 400
+        # Assuming JSON payload with necessary fields in the request body
+        data = request.json
+        full_s3_path = data.get('full_s3_path')
+        img_name = data.get('img_name')
 
-    # Retrieve results from DynamoDB
-    try:
-        response = table.get_item(Key={'predictionId': prediction_id})
-        item = response.get('Item')
-        if not item:
-            return jsonify({'error': 'No results found for the given predictionId'}), 404
+        if not full_s3_path or not img_name:
+            return jsonify({'error': 'Missing full_s3_path or img_name'}), 400
 
-        text_results = item.get('results')  # Replace 'results' with the actual attribute name
-        if not text_results:
-            return jsonify({'error': 'No results found in the item'}), 404
+        # Initialize RESULTS handler
+        results_handler = RESULTS(BUCKET_NAME, full_s3_path, img_name)
+
+        # Call results_filters method from RESULTS class with necessary parameters
+        prediction_result, local_photo = results_handler.results_filters(full_s3_path, img_name)
+
+        # Extract chat_id and filtered_photo from prediction_result
+        chat_id = prediction_result.get('chat_id')
+        filtered_photo = prediction_result.get('filtered_photo')
+
+        # Send the filtered photo to the end-user via Telegram
+        try:
+            bot.send_photo(chat_id, img_path=filtered_photo)
+            logger.info('Successfully sent filtered photo to Telegram')
+        except Exception as e:
+            logger.error(f'Error sending photo to Telegram: {str(e)}')
+            return jsonify({'error': f'Error sending photo to Telegram: {str(e)}'}), 500
+
+        return jsonify({'status': 'Ok'}), 200
+
     except Exception as e:
-        return jsonify({'error': f'Error retrieving results: {str(e)}'}), 500
-    # Send results to the end-user via Telegram
-    try:
-        bot.send_text(chat_id, text_results)
-    except Exception as e:
-        return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
-
-    return jsonify({'status': 'Ok'}), 200
+        logger.error(f'Internal Server Error: {str(e)}')
+        return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
 
 
 @app.route('/loadTest/', methods=['POST'])
