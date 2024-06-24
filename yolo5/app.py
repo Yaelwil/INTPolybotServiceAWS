@@ -162,6 +162,7 @@ def consume():
                     if response.status_code == 200:
                         results = response.json()  # Assuming the response is JSON
                         print("Received results:", results)
+                        logger.info("Received results")
 
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
                         logger.info('deleted the job from queue')

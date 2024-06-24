@@ -70,10 +70,10 @@ def consume():
                     "img_name": img_name
                 }
 
-                logger.info(f"http://{alb_url}/results_filter?predictionId={prediction_id}")
+                logger.info(f"{alb_url}/results_filter?predictionId={prediction_id}")
 
                 # perform a GET request to Polybot to /results endpoint
-                response = requests.post(f"http://{alb_url}/results_filter?predictionId={prediction_id}", json=params)
+                response = requests.post(f"{alb_url}/results_filter?predictionId={prediction_id}", json=params)
                 print(response.text)
 
             except ValueError as e:
