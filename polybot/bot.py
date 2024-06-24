@@ -53,7 +53,6 @@ class Bot:
 
         with open(file_info.file_path, 'wb') as photo:
             photo.write(data)
-
         return file_info.file_path
 
     def send_photo(self, chat_id, img_path):
