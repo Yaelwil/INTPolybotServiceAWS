@@ -20,7 +20,8 @@ class RESULTS:
             prediction_data = json.loads(prediction_id)
             chat_id = prediction_data.get("chat_id")
             if not chat_id:
-                return jsonify({'error': 'Invalid chat_id'}), 400
+                logger.info('chat_id:{chat_id}')
+                logger.error('error: Invalid chat_id')
 
             response = self.table.get_item(Key={'predictionId': prediction_id})
             item = response.get('Item')
