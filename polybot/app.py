@@ -67,7 +67,6 @@ def results_predict():
 
     # Initialize RESULTS class
     results_handler = RESULTS(REGION, DYNAMODB_TABLE_NAME)
-
     # Call results_predict method from RESULTS class with prediction_id
     prediction_result = results_handler.results_predict(prediction_id)
 
