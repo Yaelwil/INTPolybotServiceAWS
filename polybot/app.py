@@ -87,7 +87,6 @@ def results_predict():
     # except Exception as e:
     #     return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
 
-
 @app.route('/results_filter', methods=['POST'])
 def results_filter():
     try:
