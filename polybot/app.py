@@ -87,6 +87,7 @@ def results_predict():
     # except Exception as e:
     #     return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
 
+
 @app.route('/results_filter', methods=['POST'])
 def results_filter():
     try:
@@ -98,11 +99,13 @@ def results_filter():
         if not full_s3_path or not img_name:
             return jsonify({'error': 'Missing full_s3_path or img_name'}), 400
 
+        logger.info("received request")
+
         # Initialize RESULTS handler
         results_handler = RESULTS(BUCKET_NAME, full_s3_path, img_name)
 
         # Call results_filters method from RESULTS class with necessary parameters
-        prediction_result, local_photo = results_handler.results_filters(full_s3_path, img_name)
+        prediction_result, local_photo = results_handler.results_filters(BUCKET_NAME, full_s3_path, img_name)
 
         # Extract chat_id and filtered_photo from prediction_result
         chat_id = prediction_result.get('chat_id')

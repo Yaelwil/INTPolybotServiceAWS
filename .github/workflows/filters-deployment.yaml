@@ -33,7 +33,28 @@ jobs:
     steps:
       - name: Checkout the repo code
         uses: actions/checkout@v2
-      - name: Deploy new version
-        run: |         
-          # TODO your implementation here....     
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Fetch EC2 Instance IP Addresses
+        run: |
+          EC2_FILTERS_IP_ADDRESSES=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
+          echo "Deploying to IP addresses: $EC2_POLYBOT_IP_ADDRESSES"
+
+      - name: Copy .env file to EC2 instances
+        run: |
+          # Path to your .env file locally
+          ENV_FILE="./filters/.env"
+
+          # Loop through each EC2 instance IP address
+          IFS=$'\n'
+          for IP in $EC2_POLYBOT_IP_ADDRESSES; do
+            echo "Copying .env file to $IP"
+            scp -o StrictHostKeyChecking=no -i /path/to/your-key.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env
+          done
      
