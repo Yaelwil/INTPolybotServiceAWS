@@ -86,21 +86,32 @@ jobs:
           FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
           ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
 
-      - name: Create SSH Key File
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
-          chmod 400 ssh_key.pem
-
       - name: Copy .env file to EC2 instances
         env:
           ENV_FILE: ".env"
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }} 'mkdir -p /home/ubuntu/polybot'
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem $ENV_FILE ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }}:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
+          # Ensure SSH key is correctly set up
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
+          chmod 400 ssh_key.pem
+          
+          # Ensure .env file exists
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "Error: .env file not found at $ENV_FILE"
+            exit 1
+          fi
+      
+          # Iterate over each IP address
+          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          for IP in "${IPS[@]}"; do
+            echo "Deploying to $IP"
+            
+            # Ensure SSH connectivity and copy .env file
+            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP 'mkdir -p /home/ubuntu/polybot'
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem $ENV_FILE ubuntu@$IP:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+          done
 
       - name: Cleanup SSH Key File
-        run: |
-          rm ssh_key.pem
+        run: rm ssh_key.pem
 
       - name: Deploy new version
         run: |
