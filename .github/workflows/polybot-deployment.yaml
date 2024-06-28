@@ -82,7 +82,7 @@ jobs:
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
-            scp -o StrictHostKeyChecking=no -i ~/yaelwil-aws-project.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to $IP"; exit 1; }
+            scp -o StrictHostKeyChecking=no -i ${{ secrets.PRIVATE_KEY }} $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to $IP"; exit 1; }
           done
 
       - name: Deploy new version
