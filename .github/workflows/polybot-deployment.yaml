@@ -71,10 +71,10 @@ jobs:
       - name: Fetch EC2 Instance IP Addresses Again
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids $EC2_INSTANCE_IDS --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
-          EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
-          echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
+          echo "EC2_POLYBOT_IP_ADDRESSES=\"$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS\"" >> $GITHUB_ENV
+
 
       - name: Generate .env file
         run: |
