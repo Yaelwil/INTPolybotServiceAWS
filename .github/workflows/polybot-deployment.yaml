@@ -28,8 +28,7 @@ jobs:
 
   Deploy:
     runs-on: ubuntu-latest
-    needs:
-      - Build
+    needs: Build
 
     steps:
       - name: Checkout the repo code
@@ -42,42 +41,68 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Fetch EC2 Instance IP Addresses
+      - name: Fetch EC2 Instance Details
+        id: fetch-details
         run: |
-          EC2_POLYBOT_IP_ADDRESSES=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
-          echo "Deploying to IP addresses: $EC2_POLYBOT_IP_ADDRESSES"
+          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
+          echo "$EC2_INSTANCE_DETAILS" > instance_details.json
+
+          EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]')
+          EC2_POLYBOT_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]')
+          echo "EC2_INSTANCE_IDS=$EC2_INSTANCE_IDS" >> $GITHUB_ENV
+          echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
+
+      - name: Start Stopped Instances
+        if: env.EC2_INSTANCE_IDS != ''
+        run: |
+          for INSTANCE_ID in $EC2_INSTANCE_IDS; do
+            echo "Starting instance $INSTANCE_ID"
+            aws ec2 start-instances --instance-ids $INSTANCE_ID --region eu-west-2
+          done
+
+      - name: Wait for Instances to be Running
+        if: env.EC2_INSTANCE_IDS != ''
+        run: |
+          for INSTANCE_ID in $EC2_INSTANCE_IDS; do
+            echo "Waiting for instance $INSTANCE_ID to be running"
+            aws ec2 wait instance-running --instance-ids $INSTANCE_ID --region eu-west-2
+          done
+
+      - name: Fetch EC2 Instance IP Addresses Again
+        if: env.EC2_INSTANCE_IDS != ''
+        run: |
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids $EC2_INSTANCE_IDS --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None')
+          echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
+          EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
+          echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Copy .env file to EC2 instances
         run: |
-          # Path to your .env file locally
           ENV_FILE="./polybot/.env"
-
-          # Loop through each EC2 instance IP address
           IFS=$'\n'
           for IP in $EC2_POLYBOT_IP_ADDRESSES; do
             echo "Copying .env file to $IP"
-            scp -o StrictHostKeyChecking=no -i /path/to/your-key.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env
+            scp -o StrictHostKeyChecking=no -i ~/yaelwil-aws-project.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to $IP"; exit 1; }
           done
 
       - name: Deploy new version
         run: |
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
-
-          # SSH into each instance and deploy the new Docker image with sudo
           IFS=$'\n'
           for IP in $EC2_POLYBOT_IP_ADDRESSES; do
             echo "Deploying to $IP"
-
-            # SSH into the instance and run sudo commands
-            ssh -o StrictHostKeyChecking=no ec2-user@$IP << 'EOF'
-              # Pull the latest Docker image
-              docker pull $POLYBOT_IMAGE_NAME
-
-              # Stop and remove the existing container if running
+            ssh -o StrictHostKeyChecking=no -i /path/to/your-key.pem ec2-user@$IP << EOF || { echo "Failed to SSH into $IP"; exit 1; }
+              docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
               sudo docker stop polybot || true
               sudo docker rm polybot || true
-
-              # Run the new Docker container with .env file and auto-restart
-              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ec2-user/polybot/.env $POLYBOT_IMAGE_NAME
-            EOF
+              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ec2-user/polybot/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+              EOF
           done
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Deployment failed. Please check the logs for more details."
+
+      - name: Notify on success
+        if: success()
+        run: echo "Deployment succeeded."
