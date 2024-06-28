@@ -81,7 +81,7 @@ jobs:
           ENV_FILE: "./polybot/.env"
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          ls -l ./polybot  # List contents of polybot directory for debugging
+          ls -la ./polybot  # List all files including hidden ones for debugging
           cat ./polybot/.env  # Display contents of .env file for debugging
       
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
