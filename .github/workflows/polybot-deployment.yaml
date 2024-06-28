@@ -90,9 +90,13 @@ jobs:
         env:
           ENV_FILE: ".env"
         run: |
-          # Ensure SSH key is correctly set up
+          # Write SSH private key to a file
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
           chmod 400 ssh_key.pem
+          
+          # Start SSH agent and add the SSH private key
+          eval $(ssh-agent)
+          ssh-add ssh_key.pem
           
           # Ensure .env file exists
           if [ ! -f "$ENV_FILE" ]; then
