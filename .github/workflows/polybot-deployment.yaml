@@ -81,12 +81,15 @@ jobs:
           ENV_FILE: "./polybot/.env"
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          ls -l ./polybot  # List contents of polybot directory for debugging
+          cat ./polybot/.env  # Display contents of .env file for debugging
+      
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           echo "$SSH_PRIVATE_KEY" > ssh_key.pem
           chmod 400 ssh_key.pem  # Set correct permissions
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
-            ssh -o StrictHostKeyChecking=no -i <(echo "$SSH_PRIVATE_KEY") ec2-user@$IP "mkdir -p /home/ec2-user/polybot/ && cat > /home/ec2-user/polybot/.env" < "$ENV_FILE" || { echo "Failed to copy .env file to $IP"; exit 1; }
+            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$IP "mkdir -p /home/ec2-user/polybot/ && cat > /home/ec2-user/polybot/.env" < "$ENV_FILE" || { echo "Failed to copy .env file to $IP"; exit 1; }
           done
           rm ssh_key.pem  # Remove the key file after use
 
