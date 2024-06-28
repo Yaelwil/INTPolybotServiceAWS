@@ -44,7 +44,7 @@ jobs:
       - name: Fetch EC2 Instance Details
         id: fetch-details
         run: |
-          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
+          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
           EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
@@ -72,9 +72,9 @@ jobs:
         if: env.EC2_INSTANCE_IDS != ''
         run: |
           NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids $EC2_INSTANCE_IDS --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None')
-          echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
-          EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
-          echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
+          echo -e "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
+          EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES\n$NEW_RUNNING_INSTANCE_IPS"
+          echo -e "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Copy .env file to EC2 instances
         run: |
