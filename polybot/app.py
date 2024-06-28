@@ -98,7 +98,6 @@ def results_filter():
 
         if not full_s3_path or not img_name:
             return jsonify({'error': 'Missing full_s3_path or img_name'}), 400
-
         logger.info("received request")
 
         # Initialize RESULTS handler

@@ -47,8 +47,8 @@ jobs:
           EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
-          EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]')
-          EC2_POLYBOT_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]')
+          EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
+          EC2_POLYBOT_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
           echo "EC2_INSTANCE_IDS=$EC2_INSTANCE_IDS" >> $GITHUB_ENV
           echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
