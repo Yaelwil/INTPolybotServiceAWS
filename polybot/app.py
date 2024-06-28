@@ -83,7 +83,6 @@ def results_predict():
         logger.info('Successfully sent prediction results to Telegram')
     except Exception as e:
         return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
-
     return jsonify({'status': 'Ok'}), 200
 
     # except Exception as e:
