@@ -8,6 +8,24 @@ on:
       - main
 
 jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo code
+        uses: actions/checkout@v2
+
+      - name: Build and push image
+        run: |
+          cd polybot
+          
+          # Login to DockerHub         
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          # Build and push Docker image
+          POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
+          docker build -t $POLYBOT_IMAGE_NAME .
+          docker push $POLYBOT_IMAGE_NAME
+
   Deploy:
     runs-on: ubuntu-latest
     needs: Build
