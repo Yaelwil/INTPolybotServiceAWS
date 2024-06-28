@@ -93,7 +93,7 @@ jobs:
 
       - name: Copy .env file to EC2 instances
         env:
-          ENV_FILE: "./.env"
+          ENV_FILE: "./polybot/.env"
         run: |
           scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESSES }}:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
 
