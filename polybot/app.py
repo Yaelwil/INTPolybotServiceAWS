@@ -33,6 +33,7 @@ alb_url = os.environ["ALB_URL"]
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
 
 domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
+
 with open(domain_certificate_file, 'w') as file:
     file.write(DOMAIN_CERTIFICATE)
 

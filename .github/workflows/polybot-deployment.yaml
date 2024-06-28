@@ -76,21 +76,27 @@ jobs:
           EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
           echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
+      - name: Generate .env file
+        run: |
+            echo "BUCKET_NAME=yaelwil-bucket-aws-project
+            TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com
+            REGION=eu-west-2
+            DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
+            YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
+            FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
+            ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com
+            > ./polybot/.env>
+
       - name: Copy .env file to EC2 instances
         env:
           ENV_FILE: "./polybot/.env"
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          ls -la ./polybot  # List all files including hidden ones for debugging
-          cat ./polybot/.env  # Display contents of .env file for debugging
-      
-          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           echo "$SSH_PRIVATE_KEY" > ssh_key.pem
-          chmod 400 ssh_key.pem  # Set correct permissions
-          for IP in "${IPS[@]}"; do
-            echo "Copying .env file to $IP"
-            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$IP "mkdir -p /home/ec2-user/polybot/ && cat > /home/ec2-user/polybot/.env" < "$ENV_FILE" || { echo "Failed to copy .env file to $IP"; exit 1; }
-          done
+          chmod 400 ssh_key.pem
+      
+          scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ec2-user@${{ env.EC2_POLYBOT_IP_ADDRESS }}:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
+      
           rm ssh_key.pem  # Remove the key file after use
 
       - name: Deploy new version
