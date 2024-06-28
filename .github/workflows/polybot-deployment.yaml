@@ -93,9 +93,9 @@ jobs:
 
       - name: Copy .env file to EC2 instances
         env:
-          ENV_FILE: "./polybot/.env"
+          ENV_FILE: "./.env"
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem ./.env ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESSES }}:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
+          scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESSES }}:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
 
       - name: Cleanup SSH Key File
         run: |
@@ -111,7 +111,7 @@ jobs:
               docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
               sudo docker stop polybot || true
               sudo docker rm polybot || true
-              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/polybot/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
             EOF
           done
 
