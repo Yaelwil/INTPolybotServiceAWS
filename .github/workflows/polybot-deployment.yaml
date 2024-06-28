@@ -87,10 +87,8 @@ jobs:
           ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > ./polybot/.env
 
       - name: Copy .env file to EC2 instances
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > ssh_key.pem
+          echo ${{ secrets.SSH_PRIVATE_KEY }} > ssh_key.pem
           chmod 400 ssh_key.pem
           cat ssh_key.pem
 
