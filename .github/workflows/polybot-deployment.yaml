@@ -77,13 +77,18 @@ jobs:
           echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Copy .env file to EC2 instances
+        env:
+          ENV_FILE: "./polybot/.env"
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          ENV_FILE="./polybot/.env"
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          echo "$SSH_PRIVATE_KEY" > ssh_key.pem
+          chmod 400 ssh_key.pem  # Set correct permissions
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
-            scp -o StrictHostKeyChecking=no -i ${{ secrets.PRIVATE_KEY }} $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to $IP"; exit 1; }
+            ssh -o StrictHostKeyChecking=no -i <(echo "$SSH_PRIVATE_KEY") ec2-user@$IP "mkdir -p /home/ec2-user/polybot/ && cat > /home/ec2-user/polybot/.env" < "$ENV_FILE" || { echo "Failed to copy .env file to $IP"; exit 1; }
           done
+          rm ssh_key.pem  # Remove the key file after use
 
       - name: Deploy new version
         run: |
