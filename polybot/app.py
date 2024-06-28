@@ -113,6 +113,7 @@ def results_filter():
         try:
             bot.send_photo(chat_id, img_path=filtered_photo)
             logger.info('Successfully sent filtered photo to Telegram')
+
         except Exception as e:
             logger.error(f'Error sending photo to Telegram: {str(e)}')
             return jsonify({'error': f'Error sending photo to Telegram: {str(e)}'}), 500
