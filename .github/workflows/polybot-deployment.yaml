@@ -92,6 +92,7 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > ssh_key.pem
           chmod 400 ssh_key.pem
+          cat ssh_key.pem
 
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
