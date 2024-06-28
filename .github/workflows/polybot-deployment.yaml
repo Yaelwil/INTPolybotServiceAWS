@@ -88,14 +88,17 @@ jobs:
 
       - name: Copy .env file to EC2 instances
         env:
-          ENV_FILE: "./polybot/.env"
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$SSH_PRIVATE_KEY" > ssh_key.pem
           chmod 400 ssh_key.pem
-      
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ec2-user@${{ env.EC2_POLYBOT_IP_ADDRESS }}:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
-      
+
+          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          for IP in "${IPS[@]}"; do
+            echo "Copying .env file to $IP"
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ec2-user@$IP:/home/ec2-user/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+          done
+
           rm ssh_key.pem  # Remove the key file after use
 
       - name: Deploy new version
