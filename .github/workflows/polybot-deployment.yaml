@@ -84,8 +84,7 @@ jobs:
             DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
             YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
             FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
-            ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com"
-            > ./polybot/.env>
+            ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com" > ./polybot/.env>
 
       - name: Copy .env file to EC2 instances
         env:
