@@ -71,10 +71,10 @@ jobs:
       - name: Fetch EC2 Instance IP Addresses Again
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids $EC2_INSTANCE_IDS --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
-          echo "EC2_POLYBOT_IP_ADDRESSES=\"$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS\"" >> $GITHUB_ENV
-
+          EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
+          echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Generate .env file
         run: |
@@ -84,7 +84,7 @@ jobs:
           DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
           YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
           FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
-          ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > ./polybot/.env
+          ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
 
       - name: Create SSH Key File
         run: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Copy .env file to EC2 instances
         env:
-          ENV_FILE: "./polybot/.env"
+          ENV_FILE: ".env"
         run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }} 'mkdir -p /home/ubuntu/polybot'
           scp -o StrictHostKeyChecking=no -i ssh_key.pem $ENV_FILE ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }}:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
