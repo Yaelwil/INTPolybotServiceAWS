@@ -39,7 +39,6 @@ with open(domain_certificate_file, 'w') as file:
 
 logger.info('Created certificate file successfully')
 
-
 # Initialize bot outside of __main__ block
 bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, domain_certificate_file)
 
