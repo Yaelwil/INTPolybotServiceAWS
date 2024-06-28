@@ -74,6 +74,8 @@ jobs:
           NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
           EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
+          # Remove leading and trailing whitespace and extra spaces
+          EC2_POLYBOT_IP_ADDRESSES=$(echo $EC2_POLYBOT_IP_ADDRESSES | xargs)
           echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Generate .env file
@@ -85,6 +87,17 @@ jobs:
           YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
           FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
           ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
+          
+
+      - name: Copy ENV file to the EC2
+        id: copy-env-to-ec2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.EC2_POLYBOT_IP_ADDRESSES }} # This should contain the list of IP addresses separated by spaces
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          source: .env
+          target: /home/ubuntu/polybot/.env
 
       - name: Copy .env file to EC2 instances
         env:
