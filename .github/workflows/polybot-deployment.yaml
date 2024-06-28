@@ -95,7 +95,8 @@ jobs:
         env:
           ENV_FILE: "./polybot/.env"
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem ./polybot/.env ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESSES }}:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }} 'mkdir -p /home/ubuntu/polybot'
+          scp -o StrictHostKeyChecking=no -i ssh_key.pem $ENV_FILE ubuntu@${{ env.EC2_POLYBOT_IP_ADDRESS }}:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance"; exit 1; }
 
       - name: Cleanup SSH Key File
         run: |
