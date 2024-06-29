@@ -8,9 +8,9 @@ import boto3
 import requests
 import json
 import uuid
+from decimal import Decimal, ROUND_HALF_UP
 from json_praising import PraisingJSON
 from dynamodb_save import store_results_in_dynamodb
-from decimal import Decimal, ROUND_HALF_UP
 
 # Load environment variables
 images_bucket = os.environ["BUCKET_NAME"]
@@ -19,7 +19,7 @@ region = os.environ["REGION"]
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
 alb_url = os.environ["ALB_URL"]
 
-# Initialize SQS client, bucket and DynamoDB table
+# Initialize SQS client, S3 client, and DynamoDB resource
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb', region_name=region)
@@ -81,9 +81,7 @@ def consume():
             # Combine the base name and the file extension
             base_name, file_extension = os.path.splitext(os.path.basename(original_img_path))
             new_file_name = f"{base_name}-predict{file_extension}"
-            # new folder in S3
             s3_predicted_directory_path = 'predicted_photos/'
-            # full name in S3
             full_name_s3 = s3_predicted_directory_path + new_file_name
 
             # Upload the predicted image to S3
@@ -92,6 +90,7 @@ def consume():
 
             # Parse prediction labels and create a summary
             pred_summary_path = Path(f'static/data/{prediction_id}/labels/{original_img_path.split(".")[0]}.txt')
+            labels = []
             if pred_summary_path.exists():
                 with open(pred_summary_path) as f:
                     labels = f.read().splitlines()
@@ -104,72 +103,62 @@ def consume():
                         'height': float(l[4]),
                     } for l in labels]
 
-                logger.info(f'prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
+            logger.info(f'prediction: {prediction_id}/{original_img_path}. prediction summary:\n\n{labels}')
 
-                prediction_summary = {
-                    'prediction_id': prediction_id,
-                    'original_img_path': original_img_path,
-                    'predicted_img_path': str(predicted_img_path),
-                    'labels': labels,
-                    'time': time.time()
-                }
+            prediction_summary = {
+                'prediction_id': prediction_id,
+                'original_img_path': original_img_path,
+                'predicted_img_path': str(predicted_img_path),
+                'labels': labels,
+                'time': time.time()
+            }
 
-                # Define the path where you want to save the JSON file
-                json_file_path = f'{base_name}.json'
-                logger.info(f'Creating JSON file at path: {json_file_path}')
+            # Define the path where you want to save the JSON file
+            json_file_path = f'{base_name}.json'
+            logger.info(f'Creating JSON file at path: {json_file_path}')
 
-                # Write the prediction summary to a JSON file
-                with open(json_file_path, 'w') as json_file:
-                    json.dump(prediction_summary, json_file)
-                logger.info(f'JSON file created successfully: {json_file_path}')
+            # Write the prediction summary to a JSON file
+            with open(json_file_path, 'w') as json_file:
+                json.dump(prediction_summary, json_file)
+            logger.info(f'JSON file created successfully: {json_file_path}')
 
-                # Upload json file to S3
-                json_folder_path = "json"
-                json_full_path = f'{json_folder_path}/{json_file_path}'
-                logger.info(f'Uploading JSON file to S3: {json_full_path}')
-                try:
-                    s3.upload_file(json_file_path, images_bucket, json_full_path)
-                    logger.info(f'JSON file uploaded successfully to S3: {json_full_path}')
-                except Exception as e:
-                    logger.error(f'Failed to upload JSON file to S3: {e}')
+            # Upload json file to S3
+            json_folder_path = "json"
+            json_full_path = f'{json_folder_path}/{json_file_path}'
+            logger.info(f'Uploading JSON file to S3: {json_full_path}')
+            try:
+                s3.upload_file(json_file_path, images_bucket, json_full_path)
+                logger.info(f'JSON file uploaded successfully to S3: {json_full_path}')
+            except Exception as e:
+                logger.error(f'Failed to upload JSON file to S3: {e}')
 
-                logger.info(f'json_file_path: {json_file_path}')
+            logger.info(f'json_file_path: {json_file_path}')
 
-                # Create a PraisingJSON object and process the image
-                JSON_praising = PraisingJSON(json_file_path)
-                formatted_json_file = JSON_praising.process_prediction_results(json_file_path)
-                logger.info(f'formatted_json_file: {formatted_json_file}')
+            # Create a PraisingJSON object and process the image
+            JSON_praising = PraisingJSON(json_file_path)
+            formatted_json_file = JSON_praising.process_prediction_results(json_file_path)
+            logger.info(f'formatted_json_file: {formatted_json_file}')
 
-                # TODO store the prediction_summary in a DynamoDB table
-                if formatted_json_file:
-                    # Store the results in DynamoDB
-                    store_results_in_dynamodb(prediction_id, formatted_json_file, dynamodb_table_name, region)
-                else:
-                    logger.error('Formatted results are invalid or empty')
+            # Store the results in DynamoDB
+            if formatted_json_file:
+                store_results_in_dynamodb(prediction_id, formatted_json_file, dynamodb_table_name, region, chat_id)
+            else:
+                logger.error('Formatted results are invalid or empty')
 
-                # TODO perform a GET request to Polybot to `/results` endpoint
-                endpoint_path = '/results'
-                url = alb_url + endpoint_path
-
-                try:
-                    # TODO send a request to the ALB with the relevant details
-                    logger.info(f"{alb_url}/results_predict?predictionId={prediction_id}")
-
-                    # perform a GET request to Polybot to /results endpoint
-                    requests.post(f"{alb_url}/results_predict?predictionId={prediction_id}")
-
-                    logger.info(f"{response}")
-                    # Check if the request was successful (status code 200)
-                    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-                        logger.info("Received results")
-
+            # Perform a POST request to the /results_predict endpoint
+            try:
+                if prediction_id:
+                    response = requests.post(f"{alb_url}/results_predict?predictionId={prediction_id}")
+                    if response.status_code == 200:
+                        logger.info("Successfully sent results to the endpoint")
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
-                        logger.info('deleted the job from queue')
+                        logger.info('Deleted the job from the queue')
                     else:
-                        print(f"Failed to retrieve results. Status code: {response.status_code}")
-
-                except requests.exceptions.RequestException as e:
-                    print(f"Error during GET request: {e}")
+                        logger.error(f"Failed to send results. Status code: {response.status_code}")
+                else:
+                    logger.error("Empty or missing predictionId")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error during POST request: {e}")
 
 
 if __name__ == "__main__":

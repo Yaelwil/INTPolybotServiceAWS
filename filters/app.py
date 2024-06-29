@@ -14,6 +14,7 @@ alb_url = os.environ["ALB_URL"]
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 
+
 def consume():
     while True:
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
@@ -59,6 +60,7 @@ def consume():
             s3.upload_file(processed_img_path, images_bucket, full_name_s3)
 
             logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
+            logger.debug(f'processed_img_path: {processed_img_path}')
 
             # TODO send a request to the ALB with the relevant details
             if not alb_url:
@@ -66,8 +68,9 @@ def consume():
 
             try:
                 params = {
-                    "full_s3_path": full_s3_path,
-                    "img_name": img_name
+                    "full_s3_path": str(full_name_s3),
+                    "processed_img_path": str(processed_img_path),
+                    "chat_id": str(chat_id)
                 }
 
                 logger.info(f"{alb_url}/results_filter?predictionId={prediction_id}")
@@ -76,11 +79,15 @@ def consume():
                 response = requests.post(f"{alb_url}/results_filter?predictionId={prediction_id}", json=params)
                 print(response.text)
 
-            except ValueError as e:
-                logger.error(f"Error sending post request: {e}")
+                logger.info(f"Sending POST request to {alb_url} with params: {params}")
 
-            sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
-            logger.info('The message was deleted from the queue')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                logger.info('Deleted message from the queue')
+
+            except Exception as e:
+                logger.error(f'Error processing message: {str(e)}')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                logger.info('Deleted message from the queue')
 
 
 if __name__ == "__main__":

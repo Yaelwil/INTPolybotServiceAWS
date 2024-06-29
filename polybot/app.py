@@ -6,7 +6,7 @@ from flask import request, jsonify
 import boto3
 from bot import ObjectDetectionBot
 from get_secrets import get_secret
-from results import RESULTS
+import results
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 app = flask.Flask(__name__)
@@ -57,63 +57,54 @@ def webhook():
 
 @app.route('/results_predict', methods=['POST'])
 def results_predict():
-    logger.info('Received request from yolov5')
-
-    # try:
     prediction_id = request.args.get('predictionId')
-
     if not prediction_id:
         return jsonify({'error': 'Missing predictionId'}), 400
 
-    # Initialize RESULTS class
-    results_handler = RESULTS(REGION, DYNAMODB_TABLE_NAME)
+    # Fetch prediction results
+    response_json, status_code = results.fetch_results_predict(prediction_id)
 
+    # Check if the fetch was successful
+    if status_code != 200:
+        return jsonify(response_json), status_code
 
-    # Call results_predict method from RESULTS class with prediction_id
-    prediction_result = results_handler.results_predict(prediction_id)
-    logger.info(f'prediction_result:{prediction_result}')
+    chat_id = response_json.get('chat_id')
+    text_results = response_json.get('text_results')
 
-    # Extract relevant information from the prediction result
-    chat_id = prediction_result.get('chat_id')
-    text_results = prediction_result.get('text_results')
+    if not chat_id:
+        return jsonify({'error': 'chat_id not found in the response'}), 400
 
-    # Send results to the end-user via Telegram
-    try:
-        bot.send_text(chat_id, text_results)
-        logger.info('Successfully sent prediction results to Telegram')
-    except Exception as e:
-        return jsonify({'error': f'Error sending message to Telegram: {str(e)}'}), 500
-    return jsonify({'status': 'Ok'}), 200
+    # Send the message to the user via Telegram
 
-    # except Exception as e:
-    #     return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
+    bot.send_text(chat_id, text_results)
+    logger.info("Successfully sent results to the end user")
+    return jsonify({'status': 'Message sent successfully'}), 200
 
 
 @app.route('/results_filter', methods=['POST'])
 def results_filter():
+    s3 = boto3.client('s3')
     try:
-        # Assuming JSON payload with necessary fields in the request body
         data = request.json
         full_s3_path = data.get('full_s3_path')
-        img_name = data.get('img_name')
+        processed_img_path = data.get('processed_img_path')
+        chat_id = data.get('chat_id')
 
-        if not full_s3_path or not img_name:
+        if not full_s3_path or not processed_img_path:
             return jsonify({'error': 'Missing full_s3_path or img_name'}), 400
-        logger.info("received request")
 
-        # Initialize RESULTS handler
-        results_handler = RESULTS(BUCKET_NAME, full_s3_path, img_name)
+        logger.info("Received request")
+        logger.debug(f'full_s3_path: {full_s3_path}')
+        logger.debug(f'img_name: {processed_img_path}')
+        logger.debug(f'chat_id: {chat_id}')
 
-        # Call results_filters method from RESULTS class with necessary parameters
-        prediction_result, local_photo = results_handler.results_filters(BUCKET_NAME, full_s3_path, img_name)
+        s3.download_file(BUCKET_NAME, full_s3_path, processed_img_path)
 
-        # Extract chat_id and filtered_photo from prediction_result
-        chat_id = prediction_result.get('chat_id')
-        filtered_photo = prediction_result.get('filtered_photo')
+        logger.debug(f'img_name: {processed_img_path}')
 
         # Send the filtered photo to the end-user via Telegram
         try:
-            bot.send_photo(chat_id, img_path=filtered_photo)
+            bot.send_photo(chat_id, img_path=processed_img_path)
             logger.info('Successfully sent filtered photo to Telegram')
 
         except Exception as e:

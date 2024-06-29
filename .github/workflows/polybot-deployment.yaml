@@ -89,15 +89,19 @@ jobs:
           ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
           
 
-      - name: Copy ENV file to the EC2
+      - name: Copy ENV file to EC2 instances
         id: copy-env-to-ec2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ env.EC2_POLYBOT_IP_ADDRESSES }} # This should contain the list of IP addresses separated by spaces
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          source: .env
-          target: /home/ubuntu/polybot/.env
+        run: |
+          # Split IP addresses into an array
+          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          for IP in "${IPS[@]}"; do
+            echo "Copying .env file to $IP"
+            # Use scp to copy .env file to each IP
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+          done
+        env:
+          EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_POLYBOT_IP_ADDRESSES }}
+          KEY: ${{ secrets.PRIVATE_KEY }}
 
       - name: Deploy new version
         run: |
