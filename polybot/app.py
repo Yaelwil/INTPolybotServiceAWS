@@ -28,7 +28,6 @@ TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 BUCKET_NAME = os.environ["BUCKET_NAME"]
-
 alb_url = os.environ["ALB_URL"]
 
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
