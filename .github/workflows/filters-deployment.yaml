@@ -41,20 +41,60 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Fetch EC2 Instance IP Addresses
-        run: |
-          EC2_FILTERS_IP_ADDRESSES=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v 'None')
-          echo "Deploying to IP addresses: $EC2_POLYBOT_IP_ADDRESSES"
 
-      - name: Copy .env file to EC2 instances
+      - name: Fetch EC2 Instance Details
+        id: fetch-details
         run: |
-          # Path to your .env file locally
-          ENV_FILE="./filters/.env"
+          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*filters*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
+          echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
-          # Loop through each EC2 instance IP address
-          IFS=$'\n'
-          for IP in $EC2_POLYBOT_IP_ADDRESSES; do
-            echo "Copying .env file to $IP"
-            scp -o StrictHostKeyChecking=no -i /path/to/your-key.pem $ENV_FILE ec2-user@$IP:/home/ec2-user/polybot/.env
-          done
-     
+          EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
+          EC2_POLYBOT_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
+          echo "EC2_INSTANCE_IDS=$EC2_INSTANCE_IDS" >> $GITHUB_ENV
+          echo "EC2_FILTERS_IP_ADDRESSES=$EC2_FILTERS_IP_ADDRESSES" >> $GITHUB_ENV
+
+      - name: Fetch EC2 Instance IP Addresses Again
+        if: env.EC2_INSTANCE_IDS != ''
+        run: |
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
+          echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
+          # Ensure proper formatting of IP addresses
+          EC2_POLYBOT_IP_ADDRESSES="$EC2_FILTERS_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
+          EC2_FILTERS_IP_ADDRESSES=$(echo $EC2_FILTERS_IP_ADDRESSES | xargs)
+          echo "EC2_FILTERS_IP_ADDRESSES=$EC2_FILTERS_IP_ADDRESSES" >> $GITHUB_ENV
+
+      - name: Generate .env file
+        run: |
+          echo "BUCKET_NAME=yaelwil-bucket-aws-project
+          TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com
+          REGION=eu-west-2
+          DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
+          YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
+          FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
+          ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
+
+#      - name: Create SSH key file + Copy ENV file to EC2 instances
+#        run: |
+#          POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
+#          echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
+#          sudo chmod 400 ssh_key.pem
+#          # Split IP addresses into an array
+#          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+#          for IP in "${IPS[@]}"; do
+#            echo "Deploying to $IP"
+#            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
+#              docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
+#              sudo docker stop polybot || true
+#              sudo docker rm polybot || true
+#              sudo docker run -d -p 8443:8443 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+#          EOF
+#          done
+#        env:
+#          AWS_DEFAULT_REGION: eu-west-2
+#          AWS_REGION: eu-west-2
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          EC2_INSTANCE_IDS: ${{ env.EC2_INSTANCE_IDS }}
+#          EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_FILTERS_IP_ADDRESSES }}
+#          NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
+#          KEY: ${{ secrets.PRIVATE_KEY }}
