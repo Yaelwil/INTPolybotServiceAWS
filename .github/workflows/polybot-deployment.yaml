@@ -102,7 +102,7 @@ jobs:
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
             # Use scp to copy .env file to each IP
-            scp -o StrictHostKeyChecking=no -i ssh_key.pem polybot/.env ubuntu@$IP:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
           done
         env:
           AWS_DEFAULT_REGION: eu-west-2
