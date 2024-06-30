@@ -88,13 +88,15 @@ jobs:
           FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
           ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
 
-      - name: Create SSH key file
+#      - name: Create SSH key file
+#        run: |
+#          echo "${{ secrets.PRIVATE_KEY }}" > ssh_key.pem
+#          sudo chmod 400 ssh_key.pem
+
+      - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
           echo "${{ secrets.PRIVATE_KEY }}" > ssh_key.pem
           sudo chmod 400 ssh_key.pem
-
-      - name: Copy ENV file to EC2 instances
-        run: |
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "${{ env.EC2_POLYBOT_IP_ADDRESSES }}"
           for IP in "${IPS[@]}"; do
@@ -119,7 +121,7 @@ jobs:
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Deploying to $IP"
-            ssh -o StrictHostKeyChecking=no -i /path/to/your-key.pem ubuntu@$IP << EOF || { echo "Failed to SSH into $IP"; exit 1; }
+            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF || { echo "Failed to SSH into $IP"; exit 1; }
               docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
               sudo docker stop polybot || true
               sudo docker rm polybot || true
