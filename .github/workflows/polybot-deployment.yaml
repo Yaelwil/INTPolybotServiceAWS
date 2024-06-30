@@ -111,10 +111,9 @@ jobs:
           AWS_REGION: eu-west-2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          EC2_INSTANCE_IDS: ${{ secrets.EC2_INSTANCE_IDS }}
-          EC2_POLYBOT_IP_ADDRESSES: ${{ secrets.EC2_POLYBOT_IP_ADDRESSES }}
-          NEW_RUNNING_INSTANCE_IPS: ${{ secrets.NEW_RUNNING_INSTANCE_IPS }}
-          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          EC2_INSTANCE_IDS: $EC2_INSTANCE_IDS
+          EC2_POLYBOT_IP_ADDRESSES: $EC2_POLYBOT_IP_ADDRESSES
+          KEY: ${{ secrets.PRIVATE_KEY }}
 
       - name: Deploy new version
         run: |
