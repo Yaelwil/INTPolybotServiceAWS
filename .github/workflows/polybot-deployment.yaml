@@ -91,7 +91,7 @@ jobs:
       - name: Create SSH key file
         run: |
           echo "$KEY" > ssh_key.pem
-          chmod 600 ssh_key.pem
+          chmod 400 ssh_key.pem
         env:
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
