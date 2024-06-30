@@ -101,7 +101,6 @@ jobs:
           IFS=' ' read -r -a IPS <<< "${{ env.EC2_POLYBOT_IP_ADDRESSES }}"
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
-          cat "ssh_key.pem"[0,10]
             # Use scp to copy .env file to each IP
             scp -o StrictHostKeyChecking=no -i ssh_key.pem polybot/.env ubuntu@$IP:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
           done
