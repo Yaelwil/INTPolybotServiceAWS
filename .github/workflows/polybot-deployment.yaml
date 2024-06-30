@@ -95,7 +95,7 @@ jobs:
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
-          echo "${{ secrets.PRIVATE_KEY }}" > ssh_key.pem
+          echo ${{ secrets.PRIVATE_KEY }} > ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "${{ env.EC2_POLYBOT_IP_ADDRESSES }}"
