@@ -95,7 +95,6 @@ jobs:
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
-          sudo usermod -aG docker ec2-user
           sudo usermod -aG docker ubuntu
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
           echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
@@ -120,11 +119,3 @@ jobs:
           EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_POLYBOT_IP_ADDRESSES }}
           NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "Deployment failed. Please check the logs for more details."
-
-      - name: Notify on success
-        if: success()
-        run: echo "Deployment succeeded."
