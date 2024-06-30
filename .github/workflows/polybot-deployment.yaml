@@ -95,6 +95,7 @@ jobs:
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
+          sudo usermod -aG docker ubuntu
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
           echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
