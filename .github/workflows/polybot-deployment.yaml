@@ -98,20 +98,21 @@ jobs:
       - name: Copy ENV file to EC2 instances
         run: |
           # Split IP addresses into an array
-          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          IFS=' ' read -r -a IPS <<< "${{ env.EC2_POLYBOT_IP_ADDRESSES }}"
           for IP in "${IPS[@]}"; do
             echo "Copying .env file to $IP"
             # Use scp to copy .env file to each IP
-            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem polybot/.env ubuntu@$IP:/home/ubuntu/polybot/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
           done
         env:
           AWS_DEFAULT_REGION: eu-west-2
           AWS_REGION: eu-west-2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          EC2_INSTANCE_IDS: $EC2_INSTANCE_IDS
-          EC2_POLYBOT_IP_ADDRESSES: $EC2_POLYBOT_IP_ADDRESSES
-          KEY: ${{ secrets.PRIVATE_KEY }}
+          EC2_INSTANCE_IDS: ${{ env.EC2_INSTANCE_IDS }}
+          EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_POLYBOT_IP_ADDRESSES }}
+          NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy new version
         run: |
