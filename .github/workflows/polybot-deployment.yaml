@@ -106,7 +106,7 @@ jobs:
               docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
               sudo docker stop polybot || true
               sudo docker rm polybot || true
-              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+              sudo docker run -d -p 8443:8443 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
           EOF
           done
         env:
@@ -118,20 +118,6 @@ jobs:
           EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_POLYBOT_IP_ADDRESSES }}
           NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Deploy new version
-        run: |
-          POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
-          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
-          for IP in "${IPS[@]}"; do
-            echo "Deploying to $IP"
-            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF || { echo "Failed to SSH into $IP"; exit 1; }
-              docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
-              sudo docker stop polybot || true
-              sudo docker rm polybot || true
-              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
-            EOF
-          done
 
       - name: Notify on failure
         if: failure()
