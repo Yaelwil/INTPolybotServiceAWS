@@ -90,10 +90,8 @@ jobs:
 
       - name: Create SSH key file
         run: |
-          echo "$KEY" > ssh_key.pem
+          echo ${{ secrets.PRIVATE_KEY }} > ssh_key.pem
           chmod 400 ssh_key.pem
-        env:
-          KEY: ${{ secrets.PRIVATE_KEY }}
 
       - name: Copy ENV file to EC2 instances
         run: |
