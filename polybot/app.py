@@ -25,6 +25,7 @@ else:
     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
 
 TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
+
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 BUCKET_NAME = os.environ["BUCKET_NAME"]

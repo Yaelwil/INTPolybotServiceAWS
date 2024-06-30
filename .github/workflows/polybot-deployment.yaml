@@ -98,11 +98,15 @@ jobs:
           echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
-          IFS=' ' read -r -a IPS <<< "${{ env.EC2_POLYBOT_IP_ADDRESSES }}"
+          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
-            echo "Copying .env file to $IP"
-            # Use scp to copy .env file to each IP
-            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/.env || { echo "Failed to copy .env file to EC2 instance $IP"; exit 1; }
+            echo "Deploying to $IP"
+            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
+              docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
+              sudo docker stop polybot || true
+              sudo docker rm polybot || true
+              sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+          EOF
           done
         env:
           AWS_DEFAULT_REGION: eu-west-2
