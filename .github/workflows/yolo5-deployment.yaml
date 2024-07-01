@@ -75,7 +75,7 @@ jobs:
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
-          YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
+          YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/yolov5:0.0.${{ github.run_number }}
           echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
