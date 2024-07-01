@@ -144,6 +144,7 @@ def consume():
                 store_results_in_dynamodb(prediction_id, formatted_json_file, dynamodb_table_name, region, chat_id)
             else:
                 logger.error('Formatted results are invalid or empty')
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
 
             # Perform a POST request to the /results_predict endpoint
             try:
