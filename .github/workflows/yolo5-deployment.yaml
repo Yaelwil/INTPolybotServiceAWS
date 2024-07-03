@@ -84,8 +84,8 @@ jobs:
             echo "Deploying to $IP"
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
               sudo docker pull $YOLOV5_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
-              sudo docker stop polybot || true
-              sudo docker rm polybot || true
+              sudo docker stop yolov5 || true
+              sudo docker rm yolov5 || true
               sudo docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name yolov5 --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
           EOF
           done
