@@ -75,6 +75,7 @@ def consume():
                 }
 
                 logger.info(f"{alb_url}/results_filter?predictionId={prediction_id}")
+
                 # perform a GET request to Polybot to /results endpoint
                 response = requests.post(f"{alb_url}/results_filter?predictionId={prediction_id}", json=params)
                 print(response.text)

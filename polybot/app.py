@@ -34,7 +34,6 @@ domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
 
 with open(domain_certificate_file, 'w') as file:
     file.write(DOMAIN_CERTIFICATE)
-
 logger.info('Created certificate file successfully')
 
 # Initialize bot outside of __main__ block
