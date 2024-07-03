@@ -49,7 +49,7 @@ jobs:
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
           EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
-          EC2_YOLOV5_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
+          EC2_FILTERS _IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
           echo "EC2_INSTANCE_IDS=$EC2_INSTANCE_IDS" >> $GITHUB_ENV
           echo "EC2_FILTERS_IP_ADDRESSES=$EC2_FILTERS_IP_ADDRESSES" >> $GITHUB_ENV
 
@@ -59,7 +59,7 @@ jobs:
           NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
           # Ensure proper formatting of IP addresses
-          EC2_YOLOV5_IP_ADDRESSES="$EC2_FILTERS_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
+          EC2_FILTERS _IP_ADDRESSES="$EC2_FILTERS_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
           EC2_FILTERS_IP_ADDRESSES=$(echo $EC2_FILTERS_IP_ADDRESSES | xargs)
           echo "EC2_FILTERS_IP_ADDRESSES=$EC2_FILTERS_IP_ADDRESSES" >> $GITHUB_ENV
 
@@ -75,18 +75,18 @@ jobs:
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
-          YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
+          FILTERS_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
           echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
-          IFS=' ' read -r -a IPS <<< "$EC2_YOLOV5_IP_ADDRESSES"
+          IFS=' ' read -r -a IPS <<< "$EC2_FILTERS  _IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Deploying to $IP"
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
-              docker pull $YOLOV5_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
-              sudo docker stop polybot || true
-              sudo docker rm polybot || true
-              sudo docker run -d -p 8443:8443 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name polybot --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+              docker pull $FILTERS  _IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
+              sudo docker stop filters || true
+              sudo docker rm filters || true
+              sudo docker run -d -p 8080:8080 --name filters --restart=always --env-file /home/ubuntu/.env -t $FILTERS_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
           EOF
           done
         env:
@@ -95,6 +95,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           EC2_INSTANCE_IDS: ${{ env.EC2_INSTANCE_IDS }}
-          EC2_YOLOV5_IP_ADDRESSES: ${{ env.EC2_FILTERS_IP_ADDRESSES }}
+          EC2_FILTERS _IP_ADDRESSES: ${{ env.EC2_FILTERS_IP_ADDRESSES }}
           NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
           KEY: ${{ secrets.PRIVATE_KEY }}
