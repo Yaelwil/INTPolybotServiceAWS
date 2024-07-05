@@ -3,6 +3,6 @@
  You can use multiple provider blocks in your Terraform configuration to manage resources from different providers.
 */
 provider "aws" {
-  region  = "eu-west-2"
+  region  = var.region
   profile = "default"
 }

@@ -1,0 +1,9 @@
+region             = "eu-west-1"
+availability_zone_1 = "eu-west-1a"
+availability_zone_2 = "eu-west-1b"
+iam_role = ""
+instance_type= "t2.micro"
+owner = "yaelwil"
+project = "tf-project"
+number_of_polybot_machines = 2
+ubuntu_ami = ""
