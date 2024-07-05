@@ -18,14 +18,14 @@ output "iam_role" {
   value       = var.iam_role
 }
 
-output "owner" {
+output "owner_name" {
   description = "owner"
-  value       = var.owner
+  value       = var.owner_name
 }
 
-output "project" {
+output "project_name" {
   description = "project"
-  value       = var.project
+  value       = var.project_name
 }
 
 output "number_of_polybot_machines" {
@@ -36,4 +36,34 @@ output "number_of_polybot_machines" {
 output "ubuntu_ami" {
   description = "ubuntu_ami"
   value       = var.ubuntu_ami
+}
+
+output "main_vpc_cidr" {
+  description = "main_vpc_cidr"
+  value       = var.main_vpc_cidr
+}
+
+output "public_subnet_1" {
+  description = "public_subnet_1"
+  value       = var.public_subnet_1
+}
+
+output "public_subnet_2" {
+  description = "public_subnet_2"
+  value       = var.public_subnet_2
+}
+
+output "first_telegram_cidr" {
+  description = "first_telegram_cidr"
+  value       = var.first_telegram_cidr
+}
+
+output "second_telegram_cidr" {
+  description = "second_telegram_cidr"
+  value       = var.second_telegram_cidr
+}
+
+output "public_key_path" {
+  description = "public ssh key path"
+  value       = var.public_key_path
 }

@@ -17,6 +17,7 @@ resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.main-vpc.id
   cidr_block        = var.public_subnet_1
   availability_zone = var.availability_zone_1
+  map_public_ip_on_launch = true
 
   tags = {
     Name      = "${var.owner}-public-subnet-1-${var.project}"
@@ -28,6 +29,7 @@ resource "aws_subnet" "public_subnet_2" {
   vpc_id            = aws_vpc.main-vpc.id
   cidr_block        = var.public_subnet_2
   availability_zone = var.availability_zone_2
+    map_public_ip_on_launch = true
 
   tags = {
     Name      = "${var.owner}-public-subnet-2-${var.project}"
@@ -81,51 +83,29 @@ resource "aws_network_acl" "public_network_acl" {
 #################
 # Inbound Rules #
 #################
-resource "aws_network_acl_rule" "allow_inbound_http" {
+resource "aws_network_acl_rule" "allow_all_inbound" {
   network_acl_id = aws_network_acl.public_network_acl.id
   rule_number    = 100
   protocol       = "tcp"
   rule_action    = "allow"
   egress         = false
   cidr_block     = "0.0.0.0/0"
-  from_port      = 80
-  to_port        = 80
-}
-
-resource "aws_network_acl_rule" "allow_inbound_https_1" {
-  network_acl_id = aws_network_acl.public_network_acl.id
-  rule_number    = 110
-  protocol       = "tcp"
-  rule_action    = "allow"
-  egress         = false
-  cidr_block     = var.first_telegram_cidr
-  from_port      = 8443
-  to_port        = 8443
-}
-
-resource "aws_network_acl_rule" "allow_inbound_https_2" {
-  network_acl_id = aws_network_acl.public_network_acl.id
-  rule_number    = 120
-  protocol       = "tcp"
-  rule_action    = "allow"
-  egress         = false
-  cidr_block     = var.second_telegram_cidr
-  from_port      = 8443
-  to_port        = 8443
+  from_port      = 0      // Allow all ports from 0
+  to_port        = 65535  // Allow all ports up to 65535
 }
 
 #################
 # Outbound Rules #
 #################
-resource "aws_network_acl_rule" "allow_outbound" {
+resource "aws_network_acl_rule" "allow_all_outbound" {
   network_acl_id = aws_network_acl.public_network_acl.id
-  rule_number    = 200
-  protocol       = "-1"
+  rule_number    = 100
+  protocol       = "tcp"
   rule_action    = "allow"
-  egress         = true
+  egress         = false
   cidr_block     = "0.0.0.0/0"
-  from_port      = 0
-  to_port        = 0
+  from_port      = 0      // Allow all ports from 0
+  to_port        = 65535  // Allow all ports up to 65535
 }
 
 ######################################

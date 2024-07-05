@@ -12,8 +12,12 @@ variable "project" {
 }
 
 
-variable "public_key" {
-  description = "SSH public key to be added to EC2 instance"
+variable "public_key_path" {
+  description = "SSH key"
   type        = string
-  default     = file("~/yaelwil-tf.pub")  # Path to your public key file
+}
+
+variable "main_vpc_cidr" {
+  description = "main_vpc_cidr"
+  type        = string
 }
