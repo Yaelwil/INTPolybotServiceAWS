@@ -88,3 +88,28 @@ variable "public_key_path" {
   description = "public ssh key path"
   type = string
 }
+
+variable "yolov5_instance_type" {
+  description = "yolov5_instance_type"
+  type        = string
+}
+
+variable "filters_instance_type" {
+  description = "filters_instance_type"
+  type        = string
+}
+
+variable "yolov5_ebs_dev_name" {
+  description = "yolov5_ebs_dev_name"
+  type        = string
+}
+
+variable "yolov5_ebs_volume_size" {
+  description = "yolov5_ebs_volume_size"
+  type        = number
+}
+
+variable "yolov5_ebs_volume_type" {
+  description = "yolov5_ebs_volume_type"
+  type        = string
+}

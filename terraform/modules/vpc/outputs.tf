@@ -38,16 +38,6 @@ output "public_network_acl_id" {
   value       = aws_network_acl.public_network_acl.id
 }
 
-output "first_telegram_cidr" {
-  description = "CIDR block for the first Telegram webhook"
-  value       = var.first_telegram_cidr
-}
-
-output "second_telegram_cidr" {
-  description = "CIDR block for the second Telegram webhook"
-  value       = var.second_telegram_cidr
-}
-
 output "availability_zone_1" {
   description = "availability_zone_1"
   value       = var.availability_zone_1

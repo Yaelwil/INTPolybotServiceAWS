@@ -67,3 +67,28 @@ output "public_key_path" {
   description = "public ssh key path"
   value       = var.public_key_path
 }
+
+output "yolov5_instance_type" {
+  description = "yolov5_instance_type"
+  value       = var.yolov5_instance_type
+}
+
+output "filters_instance_type" {
+  description = "filters_instance_type"
+  value       = var.filters_instance_type
+}
+
+output "yolov5_ebs_dev_name" {
+  description = "yolov5_ebs_dev_name"
+  value       = var.yolov5_ebs_dev_name
+}
+
+output "yolov5_ebs_volume_size" {
+  description = "yolov5_ebs_volume_size"
+  value       = var.yolov5_ebs_volume_size
+}
+
+output "yolov5_ebs_volume_type" {
+  description = "filters_instance_type"
+  value       = var.yolov5_ebs_volume_type
+}

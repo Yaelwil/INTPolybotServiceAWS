@@ -24,19 +24,6 @@ variable "availability_zone_2" {
   type        = string
 }
 
-##################
-# Telegram cidrs #
-##################
-variable "first_telegram_cidr" {
-  description = "telegram bots webhook" # https://core.telegram.org/bots/webhooks
-  type        = string
-}
-
-variable "second_telegram_cidr" {
-  description = "telegram bots webhook"
-  type        = string
-}
-
 ################
 # Network Vars #
 ################

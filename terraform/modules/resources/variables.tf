@@ -21,3 +21,72 @@ variable "main_vpc_cidr" {
   description = "main_vpc_cidr"
   type        = string
 }
+
+variable "main_vpc_id" {
+  description = "main_vpc_id"
+  type        = string
+}
+
+variable "polybot_port" {
+  description = "polybot_port"
+  type        = string
+}
+variable "first_telegram_cidr" {
+  description = "first_telegram_cidr"
+  type        = string
+}
+
+variable "second_telegram_cidr" {
+  description = "second_telegram_cidr"
+  type        = string
+}
+
+variable "ubuntu_ami" {
+  description = "AMI ID for Ubuntu"
+  type        = string
+}
+
+variable "yolov5_instance_type" {
+  description = "yolov5_instance_type"
+  type        = string
+}
+
+variable "filters_instance_type" {
+  description = "filters_instance_type"
+  type        = string
+}
+
+variable "public_subnet_1" {
+  description = "public_subnet_1"
+  type        = string
+}
+
+variable "public_subnet_2" {
+  description = "public_subnet_2"
+  type        = string
+}
+
+variable "public_subnet_1_id" {
+  description = "public_subnet_1_id"
+  type        = string
+}
+
+variable "public_subnet_2_id" {
+  description = "public_subnet_2_id"
+  type        = string
+}
+
+variable "yolov5_ebs_dev_name" {
+  description = "yolov5_ebs_dev_name"
+  type        = string
+}
+
+variable "yolov5_ebs_volume_size" {
+  description = "yolov5_ebs_volume_size"
+  type        = number
+}
+
+variable "yolov5_ebs_volume_type" {
+  description = "yolov5_ebs_volume_type"
+  type        = string
+}

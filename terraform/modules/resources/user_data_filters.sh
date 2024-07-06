@@ -18,7 +18,7 @@ sudo systemctl enable docker
 sudo systemctl start docker
 
 # Fetch tags using Docker Hub API and select the latest tag
-IMAGE_NAME="yaeli1/polybot"
+IMAGE_NAME="yaeli1/filters"
 PAGE_SIZE=100
 LATEST_TAG=$(curl -s "https://hub.docker.com/v2/repositories/$IMAGE_NAME/tags/?page_size=$PAGE_SIZE" | \
     jq -r '.results | map(.name) | max_by(. | split(".") | map(tonumber))')
