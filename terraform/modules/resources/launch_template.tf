@@ -29,7 +29,7 @@ resource "aws_launch_template" "yolov5_launch_template" {
     }
   }
 
-    user_data = file("${path.module}/user_data_yolov5.sh")
+    user_data = base64encode(file("${path.module}/user_data_yolov5.sh"))
 
   tag_specifications {
     resource_type = "instance"
@@ -63,7 +63,7 @@ resource "aws_launch_template" "filters_launch_template" {
     security_groups = [aws_security_group.asg_sg.id]
   }
 
-    user_data = file("${path.module}/user_data_filters.sh")
+    user_data = base64encode(file("${path.module}/user_data_filters.sh"))
 
   tag_specifications {
     resource_type = "instance"

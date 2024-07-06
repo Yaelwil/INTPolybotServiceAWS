@@ -3,7 +3,7 @@
 ##########################################
 
 resource "aws_security_group" "asg_sg" {
-  name_prefix = "asg-sg-"
+  name_prefix = "${var.owner}-asg-sg-${var.project}"
   vpc_id      = var.main_vpc_id
 
   ingress {

@@ -2,9 +2,9 @@ resource "aws_s3_bucket" "project_bucket" {
   bucket = "${var.owner}-bucket-${var.project}"
   acl    = "private"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+#   lifecycle {
+#     prevent_destroy = true
+#   }
 
   tags = {
     Name      = "${var.owner}-bucket-${var.project}"
