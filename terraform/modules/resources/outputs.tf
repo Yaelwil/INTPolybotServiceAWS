@@ -75,3 +75,33 @@ output "yolov5_ebs_volume_type" {
   description = "filters_instance_type"
   value       = var.yolov5_ebs_volume_type
 }
+
+output "asg_filters_min_size" {
+  description = "asg_filters_min_size"
+  value       = var.asg_filters_min_size
+}
+
+output "asg_yolov5_min_size" {
+  description = "asg_yolov5_min_size"
+  value       = var.asg_yolov5_min_size
+}
+
+output "asg_filters_desired_capacity" {
+  description = "asg_filters_desired_capacity"
+  value       = var.asg_filters_desired_capacity
+}
+
+output "asg_filters_max_size" {
+  description = "asg_filters_max_size"
+  value       = var.asg_filters_max_size
+}
+
+output "asg_yolov5_max_size" {
+  description = "asg_yolov5_max_size"
+  value       = var.asg_yolov5_max_size
+}
+
+output "asg_yolov5_desired_capacity" {
+  description = "asg_yolov5_desired_capacity"
+  value       = var.asg_yolov5_desired_capacity
+}
