@@ -46,16 +46,29 @@ module "resources" {
 
   ubuntu_ami = var.ubuntu_ami
   polybot_port = var.polybot_port
+  public_subnet_1_id = module.vpc.public_subnet_id_1
+  public_subnet_2_id = module.vpc.public_subnet_id_2
+}
+
+module "yolov5_filters" {
+  source = "./modules/yolov5_filters"
+
   yolov5_instance_type = var.yolov5_instance_type
   yolov5_ebs_dev_name = var.yolov5_ebs_dev_name
   yolov5_ebs_volume_size = var.yolov5_ebs_volume_size
   yolov5_ebs_volume_type = var.yolov5_ebs_volume_type
-  public_subnet_1_id = module.vpc.public_subnet_id_1
-  public_subnet_2_id = module.vpc.public_subnet_id_2
   asg_filters_desired_capacity = var.asg_filters_desired_capacity
   asg_filters_max_size = var.asg_filters_max_size
   asg_filters_min_size = var.asg_filters_min_size
   asg_yolov5_desired_capacity = var.asg_yolov5_desired_capacity
   asg_yolov5_max_size = var.asg_yolov5_max_size
   asg_yolov5_min_size = var.asg_yolov5_min_size
+  main_vpc_id        = module.vpc.vpc_id
+  owner              = var.owner_name
+  project            = var.project_name
+  public_key_path    = var.public_key_path
+  public_subnet_1_id = module.vpc.public_subnet_id_1
+  public_subnet_2_id = module.vpc.public_subnet_id_2
 }
+
+
