@@ -18,7 +18,7 @@ jobs:
         run: |
           cd polybot
           
-          # Login to DockerHub         
+          # Login to DockerHub
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
           # Build and push Docker image
@@ -30,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: Build
 
+    env:
+      AWS_REGION: eu-west-2
+
     steps:
       - name: Checkout the repo code
         uses: actions/checkout@v2
@@ -39,12 +42,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Fetch EC2 Instance Details
         id: fetch-details
         run: |
-          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*polybot*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
+          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region ${{ env.AWS_REGION }} --filters "Name=tag:Name,Values=*polybot*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
           EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
@@ -55,23 +58,23 @@ jobs:
       - name: Start Stopped Instances
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDS }}; do
+          for INSTANCE_ID in $EC2_INSTANCE_IDS; do
             echo "Starting instance $INSTANCE_ID"
-            aws ec2 start-instances --instance-ids $INSTANCE_ID --region eu-west-2
+            aws ec2 start-instances --instance-ids $INSTANCE_ID --region $AWS_REGION || { echo "Failed to start instance $INSTANCE_ID"; exit 1; }
           done
 
       - name: Wait for Instances to be Running
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDS }}; do
+          for INSTANCE_ID in $EC2_INSTANCE_IDS; do
             echo "Waiting for instance $INSTANCE_ID to be running"
-            aws ec2 wait instance-running --instance-ids $INSTANCE_ID --region eu-west-2
+            aws ec2 wait instance-running --instance-ids $INSTANCE_ID --region $AWS_REGION || { echo "Instance $INSTANCE_ID did not reach running state"; exit 1; }
           done
 
       - name: Fetch EC2 Instance IP Addresses Again
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region $AWS_REGION --instance-ids $EC2_INSTANCE_IDS --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
           # Ensure proper formatting of IP addresses
           EC2_POLYBOT_IP_ADDRESSES="$EC2_POLYBOT_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
@@ -81,17 +84,17 @@ jobs:
       - name: Generate .env file
         run: |
           echo "BUCKET_NAME=yaelwil-bucket-aws-project
-          TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com
-          REGION=eu-west-2
+          TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.${AWS_REGION}.elb.amazonaws.com
+          REGION=${AWS_REGION}
           DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
-          YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
-          FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
-          ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
+          YOLO_QUEUE_NAME=https://sqs.${AWS_REGION}.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
+          FILTERS_QUEUE_NAME=https://sqs.${AWS_REGION}.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
+          ALB_URL=https://yaelwil-alb-aws-project-1971553365.${AWS_REGION}.elb.amazonaws.com:80" > .env
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
           POLYBOT_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/polybot:0.0.${{ github.run_number }}
-          echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
@@ -102,14 +105,5 @@ jobs:
               sudo docker stop polybot || true
               sudo docker rm polybot || true
               sudo docker run -d -p 8443:8443 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
-          EOF
+            EOF
           done
-        env:
-          AWS_DEFAULT_REGION: eu-west-2
-          AWS_REGION: eu-west-2
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          EC2_INSTANCE_IDS: ${{ env.EC2_INSTANCE_IDS }}
-          EC2_POLYBOT_IP_ADDRESSES: ${{ env.EC2_POLYBOT_IP_ADDRESSES }}
-          NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
-          KEY: ${{ secrets.SSH_PRIVATE_KEY }}

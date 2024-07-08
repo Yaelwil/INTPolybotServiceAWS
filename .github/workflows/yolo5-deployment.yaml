@@ -18,9 +18,10 @@ jobs:
         run: |
           cd yolo5
           
-          # Login to DockerHub:         
+          # Login to DockerHub         
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
+          # Build and push Docker image
           YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/yolov5:0.0.${{ github.run_number }}
           docker build -t $YOLOV5_IMAGE_NAME .
           docker push $YOLOV5_IMAGE_NAME     
@@ -29,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - Build
+    env:
+      AWS_REGION: eu-west-2
 
     steps:
       - name: Checkout the repo code
@@ -39,13 +42,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Fetch EC2 Instance Details
         id: fetch-details
         run: |
-          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region eu-west-2 --filters "Name=tag:Name,Values=*yolov5*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
+          EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region ${{ env.AWS_REGION }} --filters "Name=tag:Name,Values=*yolov5*" "Name=tag:Name,Values=*yaelwil*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
 
           EC2_INSTANCE_IDS=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "stopped") | .[0]' | tr '\n' ' ')
@@ -56,7 +58,7 @@ jobs:
       - name: Fetch EC2 Instance IP Addresses Again
         if: env.EC2_INSTANCE_IDS != ''
         run: |
-          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region eu-west-2 --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
+          NEW_RUNNING_INSTANCE_IPS=$(aws ec2 describe-instances --region ${{ env.AWS_REGION }} --instance-ids ${{ env.EC2_INSTANCE_IDS }} --query 'Reservations[*].Instances[*].PublicIpAddress' --output text | grep -v 'None' | tr '\n' ' ')
           echo "NEW_RUNNING_INSTANCE_IPS=$NEW_RUNNING_INSTANCE_IPS" >> $GITHUB_ENV
           # Ensure proper formatting of IP addresses
           EC2_YOLOV5_IP_ADDRESSES="$EC2_YOLOV5_IP_ADDRESSES $NEW_RUNNING_INSTANCE_IPS"
@@ -66,17 +68,17 @@ jobs:
       - name: Generate .env file
         run: |
           echo "BUCKET_NAME=yaelwil-bucket-aws-project
-          TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com
-          REGION=eu-west-2
+          TELEGRAM_APP_URL=yaelwil-alb-aws-project-1971553365.${{ env.AWS_REGION }}.elb.amazonaws.com
+          REGION=${{ env.AWS_REGION }}
           DYNAMODB_TABLE_NAME=yaelwil-dynamodb-aws-project
-          YOLO_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
-          FILTERS_QUEUE_NAME=https://sqs.eu-west-2.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
-          ALB_URL=https://yaelwil-alb-aws-project-1971553365.eu-west-2.elb.amazonaws.com:80" > .env
+          YOLO_QUEUE_NAME=https://sqs.${{ env.AWS_REGION }}.amazonaws.com/019273956931/yaelwil-yolov5-queue-aws-project.fifo
+          FILTERS_QUEUE_NAME=https://sqs.${{ env.AWS_REGION }}.amazonaws.com/019273956931/yaelwil-filters-queue-aws-project.fifo
+          ALB_URL=https://yaelwil-alb-aws-project-1971553365.${{ env.AWS_REGION }}.elb.amazonaws.com:80" > .env
 
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
           YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/yolov5:0.0.${{ github.run_number }}
-          echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "$EC2_YOLOV5_IP_ADDRESSES"
@@ -90,11 +92,10 @@ jobs:
           EOF
           done
         env:
-          AWS_DEFAULT_REGION: eu-west-2
-          AWS_REGION: eu-west-2
+          AWS_REGION: ${{ env.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           EC2_INSTANCE_IDS: ${{ env.EC2_INSTANCE_IDS }}
           EC2_YOLOV5_IP_ADDRESSES: ${{ env.EC2_YOLOV5_IP_ADDRESSES }}
           NEW_RUNNING_INSTANCE_IPS: ${{ env.NEW_RUNNING_INSTANCE_IPS }}
-          KEY: ${{ secrets.PRIVATE_KEY }}
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
