@@ -3,6 +3,12 @@
 # need to create ALB
 # need to edit user data
 # need to attach roles to the policies and to the EC2
+# alb certificate-
+# user data-
+# TF- route 53
+# subdomain
+# permissions!!
+
 
 region             = "eu-west-1"
 availability_zone_1 = "eu-west-1a"

@@ -63,6 +63,14 @@ resource "aws_launch_template" "filters_launch_template" {
     security_groups = [aws_security_group.asg_sg.id]
   }
 
+  block_device_mappings {
+    device_name = var.filters_ebs_dev_name
+    ebs {
+      volume_size = var.filters_ebs_volume_size
+      volume_type = var.filters_ebs_volume_type
+      delete_on_termination = true
+    }
+  }
     user_data = base64encode(file("${path.module}/user_data_filters.sh"))
 
   tag_specifications {
