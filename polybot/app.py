@@ -23,7 +23,6 @@ if secret_value_TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
-
 TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]

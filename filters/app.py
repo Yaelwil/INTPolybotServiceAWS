@@ -62,7 +62,6 @@ def consume():
 
             logger.info(f'Uploaded photo to s3 successfully: {full_name_s3}')
             logger.debug(f'processed_img_path: {processed_img_path}')
-
             # TODO send a request to the ALB with the relevant details
             if not alb_url:
                 raise ValueError("ALB_URL environment variable is not set.")

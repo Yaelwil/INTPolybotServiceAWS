@@ -133,7 +133,6 @@ def consume():
                 logger.error(f'Failed to upload JSON file to S3: {e}')
 
             logger.info(f'json_file_path: {json_file_path}')
-
             # Create a PraisingJSON object and process the image
             JSON_praising = PraisingJSON(json_file_path)
             formatted_json_file = JSON_praising.process_prediction_results(json_file_path)
