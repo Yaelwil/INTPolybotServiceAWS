@@ -21,9 +21,11 @@ module "polybot" {
   instance_type      = var.instance_type
   number_of_polybot_machines = var.number_of_polybot_machines
   public_key = module.resources.my_key_pair
-  public_subnet_1 = module.vpc.public_subnet_id_1
-  public_subnet_2 = module.vpc.public_subnet_id_2
   ubuntu_ami = var.ubuntu_ami
+  public_subnet_1_id = module.vpc.public_subnet_id_1
+  public_subnet_2_id = module.vpc.public_subnet_id_1
+  public_subnet_1 = ""
+  public_subnet_2 = ""
 }
 
 module "resources" {
@@ -69,6 +71,7 @@ module "yolov5_filters" {
   public_key_path    = var.public_key_path
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
+  filters_instance_type = var.filters_instance_type
 }
 
 

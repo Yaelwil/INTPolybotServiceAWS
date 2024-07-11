@@ -33,16 +33,6 @@ output "instance_type" {
   value       = var.instance_type
 }
 
-output "public_subnet_1" {
-  description = "CIDR block for the first public subnet"
-  value       = var.public_subnet_1
-}
-
-output "public_subnet_2" {
-  description = "CIDR block for the second public subnet"
-  value       = var.public_subnet_2
-}
-
 output "public_key" {
   description = "SSH public key"
   value       = var.public_key

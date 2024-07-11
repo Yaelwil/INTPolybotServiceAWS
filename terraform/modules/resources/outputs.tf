@@ -10,7 +10,7 @@ output "main_vpc_cidr" {
 
 output "main_vpc_id" {
   description = "main_vpc_cidr"
-  value       = var.main_vpc_cidr
+  value       = var.main_vpc_id
 }
 
 output "polybot_port" {

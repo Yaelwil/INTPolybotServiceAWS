@@ -130,3 +130,29 @@ resource "aws_iam_policy" "kms_access_policy" {
     ]
   })
 }
+
+######################
+# Access to Route 53 #
+######################
+
+resource "aws_iam_policy" "route53_policy" {
+  name        = "route53AccessPolicy"
+  description = "Policy to allow creating and managing Route 53 subdomains"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "route53:ChangeResourceRecordSets",
+          "route53:CreateHostedZone",
+          "route53:GetHostedZone",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}

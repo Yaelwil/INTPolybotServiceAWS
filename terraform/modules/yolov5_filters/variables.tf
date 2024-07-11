@@ -76,3 +76,13 @@ variable "asg_yolov5_desired_capacity" {
   description = "asg_yolov5_desired_capacity"
   type        = number
 }
+
+variable "yolov5_instance_type" {
+  description = "yolov5_instance_type"
+  type        = string
+}
+
+variable "filters_instance_type" {
+  description = "filters_instance_type"
+  type        = string
+}

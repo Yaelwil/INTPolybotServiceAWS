@@ -22,6 +22,11 @@ variable "main_vpc_cidr" {
   type        = string
 }
 
+variable "main_vpc_id" {
+  description = "main_vpc_id"
+  type        = string
+}
+
 variable "polybot_port" {
   description = "polybot_port"
   type        = string
