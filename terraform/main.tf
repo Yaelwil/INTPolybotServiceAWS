@@ -24,8 +24,6 @@ module "polybot" {
   ubuntu_ami = var.ubuntu_ami
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_1
-  public_subnet_1 = ""
-  public_subnet_2 = ""
 }
 
 module "resources" {

@@ -42,16 +42,6 @@ variable "instance_type" {
   type        = string
 }
 
-variable "public_subnet_1" {
-  description = "CIDR block for the first public subnet"
-  type        = string
-}
-
-variable "public_subnet_2" {
-  description = "CIDR block for the second public subnet"
-  type        = string
-}
-
 variable "public_key" {
   description = "SSH public key"
   type        = string
