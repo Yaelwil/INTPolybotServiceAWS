@@ -143,3 +143,18 @@ variable "asg_yolov5_desired_capacity" {
   description = "asg_yolov5_desired_capacity"
   type        = number
 }
+
+variable "filters_ebs_volume_size" {
+  description = "filters_ebs_volume_size"
+  type        = string
+}
+
+variable "filters_ebs_volume_type" {
+  description = "filters_ebs_volume_type"
+  type        = string
+}
+
+variable "filters_ebs_dev_name" {
+  description = "filters_ebs_dev_name"
+  type        = string
+}

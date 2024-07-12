@@ -70,6 +70,19 @@ module "yolov5_filters" {
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
   filters_instance_type = var.filters_instance_type
+  filters_ebs_dev_name = var.filters_ebs_dev_name
+  filters_ebs_volume_size = var.filters_ebs_volume_size
+  filters_ebs_volume_type = var.filters_ebs_volume_type
+  main_vpc_cidr = module.vpc.vpc_id
+  ubuntu_ami = var.ubuntu_ami
 }
 
-
+module "permissions" {
+  source = "./modules/permissions"
+  owner              = var.owner_name
+  project            = var.project_name
+  bucket_arn = module.resources.bucket_arn
+  dynamodb_table_arn = module.resources.dynamodb_table_arn
+  yolov5_sqs_queue_arn = module.resources.yolov5_sqs_queue_arn
+  filters_sqs_queue_arn = module.resources.filters_sqs_queue_arn
+}

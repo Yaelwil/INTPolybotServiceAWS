@@ -37,3 +37,6 @@ asg_filters_min_size = 1
 asg_yolov5_desired_capacity = 1
 asg_yolov5_max_size = 5
 asg_yolov5_min_size = 1
+filters_ebs_dev_name = "/dev/sdh"
+filters_ebs_volume_size = 20
+filters_ebs_volume_type = "gp2"

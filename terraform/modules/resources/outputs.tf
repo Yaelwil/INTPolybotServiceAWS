@@ -50,3 +50,23 @@ output "public_subnet_2_id" {
   description = "public_subnet_2_id"
   value       = var.public_subnet_2_id
 }
+
+output "bucket_arn" {
+  description = "bucket_arn"
+  value       = aws_s3_bucket.project_bucket.arn
+}
+
+output "dynamodb_table_arn" {
+  description = "dynamodb_table_arn"
+  value       = aws_dynamodb_table.dynamodb-table.arn
+}
+
+output "yolov5_sqs_queue_arn" {
+  description = "yolov5_sqs_queue_arn"
+  value       = aws_sqs_queue.yolov5_sqs_queue.arn
+}
+
+output "filters_sqs_queue_arn" {
+  description = "filters_sqs_queue_arn"
+  value       = aws_sqs_queue.filters_sqs_queue.arn
+}

@@ -77,3 +77,18 @@ output "asg_yolov5_desired_capacity" {
   description = "asg_yolov5_desired_capacity"
   value       = var.asg_yolov5_desired_capacity
 }
+
+output "filters_ebs_dev_name" {
+  description = "filters_ebs_dev_name"
+  value       = var.filters_ebs_dev_name
+}
+
+output "filters_ebs_volume_size" {
+  description = "filters_ebs_volume_size"
+  value       = var.filters_ebs_volume_size
+}
+
+output "filters_ebs_volume_type" {
+  description = "filters_ebs_volume_type"
+  value       = var.filters_ebs_volume_type
+}

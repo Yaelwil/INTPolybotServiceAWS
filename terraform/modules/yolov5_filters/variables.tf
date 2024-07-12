@@ -22,6 +22,10 @@ variable "main_vpc_id" {
   type        = string
 }
 
+variable "main_vpc_cidr" {
+  description = "main_vpc_cidr"
+  type        = string
+}
 variable "public_subnet_1_id" {
   description = "public_subnet_1_id"
   type        = string
@@ -82,7 +86,27 @@ variable "yolov5_instance_type" {
   type        = string
 }
 
+variable "filters_ebs_dev_name" {
+  description = "filters_ebs_dev_name"
+  type        = string
+}
+
+variable "filters_ebs_volume_size" {
+  description = "filters_ebs_volume_size"
+  type        = string
+}
+
+variable "filters_ebs_volume_type" {
+  description = "filters_ebs_volume_type"
+  type        = string
+}
+
 variable "filters_instance_type" {
   description = "filters_instance_type"
+  type        = string
+}
+
+variable "ubuntu_ami" {
+  description = "ubuntu_ami"
   type        = string
 }

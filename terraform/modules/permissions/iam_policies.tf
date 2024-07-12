@@ -15,7 +15,7 @@ resource "aws_iam_policy" "s3_access_policy" {
                 "s3:ListBucket"
         ],
         Resource = [
-          aws_s3_bucket.project_bucket.arn
+          var.bucket_arn
         ],
         Condition = {
           IpAddress = {
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
                 "dynamodb:PutItem"
         ],
         #TODO put the required variables
-        Resource = aws_dynamodb_table.dynamodb-table.arn
+        Resource = var.dynamodb_table_arn
         Condition = {
           IpAddress = {
             "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
@@ -79,8 +79,8 @@ resource "aws_iam_policy" "sqs_access_policy" {
           "sqs:GetQueueAttributes"
         ],
         Resource = [
-          aws_sqs_queue.yolov5_sqs_queue.arn,
-          aws_sqs_queue.filters_sqs_queue.arn
+          var.yolov5_sqs_queue_arn,
+          var.filters_sqs_queue_arn
         ]
       }
     ]
