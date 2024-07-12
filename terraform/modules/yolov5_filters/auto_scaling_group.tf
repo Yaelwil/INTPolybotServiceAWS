@@ -4,6 +4,7 @@
 
 resource "aws_autoscaling_group" "filters_asg" {
   name = "${var.owner}-filters-${var.project}"
+
   launch_template {
     id      = aws_launch_template.filters_launch_template.id
     version = "$Latest"
@@ -21,6 +22,8 @@ resource "aws_autoscaling_group" "filters_asg" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
 
+  iam_instance_profile = var.ec2_role # Reference your IAM instance profile here
+
   tag {
     key                 = "Name"
     value               = "${var.owner}-filters-${var.project}"
@@ -28,14 +31,8 @@ resource "aws_autoscaling_group" "filters_asg" {
   }
 
   tag {
-    key                 = "Environment"
-    value               = "Dev"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Project"
-    value               = "YOLOv5"
+    key                 = "Terraform"
+    value               = "true"
     propagate_at_launch = true
   }
 
@@ -50,6 +47,7 @@ resource "aws_autoscaling_group" "filters_asg" {
 
 resource "aws_autoscaling_group" "yolov5_asg" {
   name = "${var.owner}-yolov5-${var.project}"
+
   launch_template {
     id      = aws_launch_template.yolov5_launch_template.id
     version = "$Latest"
@@ -67,6 +65,11 @@ resource "aws_autoscaling_group" "yolov5_asg" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
 
+  iam_instance_profile {
+      name = var.ec2_role_name  # Use the IAM role name imported from permissions module
+      # or
+      arn  = var.ec2_role_arn   # Use the IAM role ARN imported from permissions module
+    }
   tag {
     key                 = "Name"
     value               = "${var.owner}-yolov5-${var.project}"

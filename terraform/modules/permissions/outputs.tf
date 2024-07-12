@@ -52,3 +52,12 @@ output "filters_sqs_queue_arn" {
   description = "filters_sqs_queue_arn"
   value        = var.filters_sqs_queue_arn
 }
+
+############
+# SQS vars #
+############
+
+output "ec2_role_name" {
+  description = "Name of the IAM role for EC2 instances"
+  value       = aws_iam_role.ec2_role.name
+}

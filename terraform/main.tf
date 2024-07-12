@@ -17,7 +17,7 @@ module "polybot" {
   project            = var.project_name
   vpc_id = module.vpc.vpc_id
   polybot_port = var.polybot_port
-  iam_role           = var.iam_role
+  iam_role           = module.permissions.ec2_role_name
   instance_type      = var.instance_type
   number_of_polybot_machines = var.number_of_polybot_machines
   public_key = module.resources.key_pair_name
@@ -77,6 +77,7 @@ module "yolov5_filters" {
   filters_ebs_volume_type = var.filters_ebs_volume_type
   main_vpc_cidr = module.vpc.vpc_id
   ubuntu_ami = var.ubuntu_ami
+  # iam_role           = module.permissions.ec2_role_name NEED TO ADD iam ROLE
 }
 
 module "permissions" {
