@@ -70,3 +70,8 @@ output "filters_sqs_queue_arn" {
   description = "filters_sqs_queue_arn"
   value       = aws_sqs_queue.filters_sqs_queue.arn
 }
+
+output key_pair_name {
+  description = "public key name"
+  value = aws_key_pair.my_key_pair.key_name
+}

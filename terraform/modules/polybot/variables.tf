@@ -61,3 +61,13 @@ variable "public_subnet_2_id" {
   description = "public_subnet_2_id"
   type        = string
 }
+
+variable "public_subnet_1" {
+  description = "public_subnet_1_id"
+  type        = string
+}
+
+variable "public_subnet_2" {
+  description = "public_subnet_2_id"
+  type        = string
+}

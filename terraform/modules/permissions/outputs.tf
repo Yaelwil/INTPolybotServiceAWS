@@ -11,6 +11,16 @@ output "project" {
   value       = var.project
 }
 
+#############
+# VPC vars #
+#############
+
+output "main_vpc_cidr" {
+  description = "main_vpc_cidr"
+  value       = var.main_vpc_cidr
+}
+
+
 ###############
 # Bucket vars #
 ###############

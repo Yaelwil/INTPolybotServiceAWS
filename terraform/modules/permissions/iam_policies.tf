@@ -136,7 +136,7 @@ resource "aws_iam_policy" "kms_access_policy" {
 ######################
 
 resource "aws_iam_policy" "route53_policy" {
-  name        = "route53AccessPolicy"
+  name        = "${var.owner}-route53-policy-${var.project}"
   description = "Policy to allow creating and managing Route 53 subdomains"
 
   policy = jsonencode({

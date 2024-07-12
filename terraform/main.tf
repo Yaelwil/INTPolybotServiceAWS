@@ -20,10 +20,12 @@ module "polybot" {
   iam_role           = var.iam_role
   instance_type      = var.instance_type
   number_of_polybot_machines = var.number_of_polybot_machines
-  public_key = module.resources.my_key_pair
+  public_key = module.resources.key_pair_name
   ubuntu_ami = var.ubuntu_ami
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_1
+  public_subnet_1    = var.public_subnet_1
+  public_subnet_2    = var.public_subnet_2
 }
 
 module "resources" {
@@ -66,7 +68,7 @@ module "yolov5_filters" {
   main_vpc_id        = module.vpc.vpc_id
   owner              = var.owner_name
   project            = var.project_name
-  public_key_path    = var.public_key_path
+  public_key_path    = module.resources.key_pair_name
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
   filters_instance_type = var.filters_instance_type
@@ -85,4 +87,5 @@ module "permissions" {
   dynamodb_table_arn = module.resources.dynamodb_table_arn
   yolov5_sqs_queue_arn = module.resources.yolov5_sqs_queue_arn
   filters_sqs_queue_arn = module.resources.filters_sqs_queue_arn
+  main_vpc_cidr = var.main_vpc_cidr
 }

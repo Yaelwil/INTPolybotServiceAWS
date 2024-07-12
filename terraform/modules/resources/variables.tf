@@ -65,3 +65,8 @@ variable "public_subnet_2_id" {
   description = "public_subnet_2_id"
   type        = string
 }
+
+variable "filters_instance_type" {
+  description = "The instance type for filtering"
+  type        = string
+}

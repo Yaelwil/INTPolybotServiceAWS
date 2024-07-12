@@ -3,6 +3,7 @@
 ##############################
 
 resource "aws_autoscaling_group" "filters_asg" {
+  name = "${var.owner}-filters-${var.project}"
   launch_template {
     id      = aws_launch_template.filters_launch_template.id
     version = "$Latest"
@@ -48,6 +49,7 @@ resource "aws_autoscaling_group" "filters_asg" {
 #############################
 
 resource "aws_autoscaling_group" "yolov5_asg" {
+  name = "${var.owner}-yolov5-${var.project}"
   launch_template {
     id      = aws_launch_template.yolov5_launch_template.id
     version = "$Latest"

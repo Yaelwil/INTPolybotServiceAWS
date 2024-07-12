@@ -13,6 +13,11 @@ output "vpc_id" {
   value       = aws_vpc.main-vpc.id
 }
 
+output "vpc_cidr" {
+  description = "The ID of the VPC created"
+  value       = var.main_vpc_cidr
+}
+
 output "public_subnet_id_1" {
   description = "List of IDs of the public subnets created"
   value       = aws_subnet.public_subnet_1.id

@@ -42,3 +42,13 @@ output "iam_role" {
   description = "IAM role name"
   value       = var.iam_role
 }
+
+output "public_subnet_1" {
+  description = "public_subnet_1_id"
+  value        = var.public_subnet_1
+}
+
+output "public_subnet_2" {
+  description = "public_subnet_2_id"
+  value        = var.public_subnet_2
+}

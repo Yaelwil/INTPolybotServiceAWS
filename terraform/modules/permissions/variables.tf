@@ -11,6 +11,15 @@ variable "project" {
   type        = string
 }
 
+#############
+# VPC vars #
+#############
+
+variable "main_vpc_cidr" {
+  description = "main_vpc_cidr"
+  type        = string
+}
+
 ###############
 # Bucket vars #
 ###############

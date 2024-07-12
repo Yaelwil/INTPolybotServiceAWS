@@ -11,25 +11,24 @@ resource "aws_launch_template" "yolov5_launch_template" {
 
   image_id      = var.ubuntu_ami
   instance_type = var.yolov5_instance_type
-
-  key_name = var.public_key_path
+  key_name      = var.public_key_path
 
   network_interfaces {
     associate_public_ip_address = true
-    # Use the first subnet as a placeholder
     subnet_id                   = var.public_subnet_1_id
-    security_groups = [aws_security_group.asg_sg.id]
+    security_groups             = [aws_security_group.asg_sg.id]
   }
+
   block_device_mappings {
-    device_name = var.yolov5_ebs_dev_name
+    device_name           = var.yolov5_ebs_dev_name
     ebs {
-      volume_size = var.yolov5_ebs_volume_size
-      volume_type = var.yolov5_ebs_volume_type
+      volume_size          = var.yolov5_ebs_volume_size
+      volume_type          = var.yolov5_ebs_volume_type
       delete_on_termination = true
     }
   }
 
-    user_data = base64encode(file("${path.module}/user_data_yolov5.sh"))
+  user_data = base64encode(file("${path.module}/user_data.sh"))
 
   tag_specifications {
     resource_type = "instance"
@@ -39,6 +38,7 @@ resource "aws_launch_template" "yolov5_launch_template" {
     }
   }
 }
+
 
 ###########################
 # filters launch template #
@@ -53,25 +53,24 @@ resource "aws_launch_template" "filters_launch_template" {
 
   image_id      = var.ubuntu_ami
   instance_type = var.filters_instance_type
-
-  key_name = var.public_key_path
+  key_name      = var.public_key_path
 
   network_interfaces {
     associate_public_ip_address = true
-    # Use the first subnet as a placeholder
     subnet_id                   = var.public_subnet_2_id
-    security_groups = [aws_security_group.asg_sg.id]
+    security_groups             = [aws_security_group.asg_sg.id]
   }
 
   block_device_mappings {
-    device_name = var.filters_ebs_dev_name
+    device_name           = var.filters_ebs_dev_name
     ebs {
-      volume_size = var.filters_ebs_volume_size
-      volume_type = var.filters_ebs_volume_type
+      volume_size          = var.filters_ebs_volume_size
+      volume_type          = var.filters_ebs_volume_type
       delete_on_termination = true
     }
   }
-    user_data = base64encode(file("${path.module}/user_data_filters.sh"))
+
+  user_data = base64encode(file("${path.module}/user_data.sh"))
 
   tag_specifications {
     resource_type = "instance"
