@@ -101,11 +101,11 @@ jobs:
 
       - name: Generate .env file
         run: |
-          echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" > .env
-          echo "ALB_URL=${{ secrets.ALB_URL }}" >> .env
+          echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" > .env
+          echo "ALB_URL=${{ env.ALB_URL }}" >> .env
           echo "REGION=${{ matrix.region }}" >> .env
-          echo "DYNAMODB_TABLE_NAME=${{ secrets.DYNAMODB_TABLE_NAME }}" >> .env
-          echo "YOLO_QUEUE_NAME=${{ secrets.YOLO_QUEUE_URL }}" >> .env
-          echo "FILTERS_QUEUE_NAME=${{ secrets.FILTERS_QUEUE_URL }}" >> .env
+          echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
+          echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}:80" >> .env
+          echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}:80" >> .env
 
           cat .env
