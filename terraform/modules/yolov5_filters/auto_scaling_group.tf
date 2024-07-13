@@ -22,7 +22,7 @@ resource "aws_autoscaling_group" "filters_asg" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
 
-  iam_instance_profile = var.ec2_role # Reference your IAM instance profile here
+#   iam_instance_profile = var.ec2_role # Reference your IAM instance profile here
 
   tag {
     key                 = "Name"
@@ -65,11 +65,11 @@ resource "aws_autoscaling_group" "yolov5_asg" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
 
-  iam_instance_profile {
-      name = var.ec2_role_name  # Use the IAM role name imported from permissions module
-      # or
-      arn  = var.ec2_role_arn   # Use the IAM role ARN imported from permissions module
-    }
+#   iam_instance_profile {
+#       name = var.ec2_role_name  # Use the IAM role name imported from permissions module
+#       # or
+#       arn  = var.ec2_role_arn   # Use the IAM role ARN imported from permissions module
+#     }
   tag {
     key                 = "Name"
     value               = "${var.owner}-yolov5-${var.project}"
