@@ -105,7 +105,7 @@ jobs:
           echo "ALB_URL=${{ env.ALB_URL }}" >> .env
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
-          echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL/https/http }}:80" >> .env
-          echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL/https/http }}:80" >> .env
+          echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL/https:\/\//http:\/\/ }}:80" >> .env
+          echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL/https:\/\//http:\/\/ }}:80" >> .env
 
           cat .env
