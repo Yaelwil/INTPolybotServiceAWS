@@ -110,3 +110,8 @@ variable "ubuntu_ami" {
   description = "ubuntu_ami"
   type        = string
 }
+
+variable "iam_instance_profile" {
+  description = "iam_instance_profile"
+  type        = string
+}

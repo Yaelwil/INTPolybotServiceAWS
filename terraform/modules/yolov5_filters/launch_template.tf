@@ -19,6 +19,10 @@ resource "aws_launch_template" "yolov5_launch_template" {
     security_groups             = [aws_security_group.asg_sg.id]
   }
 
+  iam_instance_profile {
+    name = var.iam_instance_profile
+  }
+
   block_device_mappings {
     device_name           = var.yolov5_ebs_dev_name
     ebs {
@@ -60,6 +64,11 @@ resource "aws_launch_template" "filters_launch_template" {
     subnet_id                   = var.public_subnet_2_id
     security_groups             = [aws_security_group.asg_sg.id]
   }
+
+    iam_instance_profile {
+    name = var.iam_instance_profile
+  }
+
 
   block_device_mappings {
     device_name           = var.filters_ebs_dev_name

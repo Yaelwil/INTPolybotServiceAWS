@@ -92,3 +92,8 @@ output "filters_ebs_volume_type" {
   description = "filters_ebs_volume_type"
   value       = var.filters_ebs_volume_type
 }
+
+output "iam_instance_profile" {
+  description = "iam_instance_profile"
+  value       = var.iam_instance_profile
+}
