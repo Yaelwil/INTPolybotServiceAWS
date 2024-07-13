@@ -83,22 +83,21 @@ jobs:
 
       - name: Fetch DYNAMODB_TABLE_NAME
         run: |
-          DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'dynamodb')].[0]" --output text)
+          DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project')]" --output text)
           echo "DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME" >> $GITHUB_ENV
 
 
 
       - name: Fetch FILTERS_QUEUE_URL
         run: |
-          FILTERS_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')][0]" --output text)
+          FILTERS_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')]" --output text)
           echo "FILTERS_QUEUE_URL=$FILTERS_QUEUE_URL" >> $GITHUB_ENV
 
 
       - name: Fetch YOLO_QUEUE_URL
         run: |
-          YOLO_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'yolov5')][0]" --output text)
+          YOLO_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'yolov5')]" --output text)
           echo "YOLO_QUEUE_URL=$YOLO_QUEUE_URL" >> $GITHUB_ENV
-
 
       - name: Generate .env file
         run: |
