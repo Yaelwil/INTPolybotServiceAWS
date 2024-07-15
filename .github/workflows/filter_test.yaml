@@ -119,7 +119,7 @@ jobs:
       - name: Create SSH key file + Copy ENV file to EC2 instances
         run: |
           FILTERS_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
-          echo "${{ secrets.PRIVATE_KEY }}" >> ssh_key.pem
+          echo "${{ secrets.TF_PROJECT_PRIVATE_KEY }}" >> ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "$EC2_FILTERS_IP_ADDRESSES"
