@@ -130,5 +130,5 @@ jobs:
             sudo docker stop filters || true
             sudo docker rm filters || true
             sudo docker run -d -p 8080:8080 --restart=always --name filters --env-file /home/ubuntu/.env $FILTERS_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
-            EOF
-          done
+          EOF
+            done
