@@ -75,3 +75,9 @@ output key_pair_name {
   description = "public key name"
   value = aws_key_pair.my_key_pair.key_name
 }
+
+
+output "instance_ids" {
+  description = "List of instance IDs to register in the target group"
+  value = var.instance_ids
+}

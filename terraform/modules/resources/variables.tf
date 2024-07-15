@@ -70,3 +70,8 @@ variable "filters_instance_type" {
   description = "The instance type for filtering"
   type        = string
 }
+
+variable "instance_ids" {
+  type = list(string)
+  description = "List of instance IDs to register in the target group"
+}

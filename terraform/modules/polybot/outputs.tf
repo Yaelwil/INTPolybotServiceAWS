@@ -52,3 +52,9 @@ output "public_subnet_2" {
   description = "public_subnet_2_id"
   value        = var.public_subnet_2
 }
+
+
+output "instance_ids" {
+  description = "List of instance IDs to register in the target group"
+  value       = aws_instance.polybot[*].id
+}

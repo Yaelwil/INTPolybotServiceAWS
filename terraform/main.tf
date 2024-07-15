@@ -50,6 +50,7 @@ module "resources" {
   polybot_port = var.polybot_port
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
+  instance_ids = module.polybot.instance_ids
 }
 
 module "yolov5_filters" {
