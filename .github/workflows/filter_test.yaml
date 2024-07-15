@@ -116,19 +116,19 @@ jobs:
 
           cat .env
 
-      - name: Create SSH key file + Copy ENV file to EC2 instances
+      - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
           FILTERS_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
-          echo "${{ secrets.TF_PROJECT_PRIVATE_KEY }}" >> ssh_key.pem
+          echo "${{ secrets.TF_PROJECT_PRIVATE_KEY }}" > ssh_key.pem
           sudo chmod 400 ssh_key.pem
           # Split IP addresses into an array
           IFS=' ' read -r -a IPS <<< "$EC2_FILTERS_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Deploying to $IP"
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
-              sudo docker pull $FILTERS_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
-              sudo docker stop filters || true
-              sudo docker rm filters || true
-              sudo docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock --restart=always --name filters --env-file /home/ubuntu/.env $FILTERS_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
-          EOF
+            sudo docker pull $FILTERS_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
+            sudo docker stop filters || true
+            sudo docker rm filters || true
+            sudo docker run -d -p 8080:8080 --restart=always --name filters --env-file /home/ubuntu/.env $FILTERS_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+            EOF
           done
