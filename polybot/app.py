@@ -12,11 +12,11 @@ app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
 secret_name_TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
-secret_name_DOMAIN_CERTIFICATE = "CERTIFICATE"
+# secret_name_DOMAIN_CERTIFICATE = "CERTIFICATE"
 secret_value_TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
-DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
+# DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
-if secret_value_TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
+if secret_value_TELEGRAM_TOKEN:
     TELEGRAM_TOKEN = json.loads(secret_value_TELEGRAM_TOKEN)['TELEGRAM_TOKEN']
 
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
@@ -28,15 +28,10 @@ DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 alb_url = os.environ["ALB_URL"]
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
-domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
 
-with open(domain_certificate_file, 'w') as file:
-    file.write(DOMAIN_CERTIFICATE)
-
-logger.info('Created certificate file successfully')
 
 # Initialize bot outside of __main__ block
-bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, domain_certificate_file)
+bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
 
 
 @app.route('/', methods=['GET'])
