@@ -56,13 +56,19 @@ resource "aws_lb_target_group_attachment" "polybot_tg_attachment" {
 # Listeners #
 #############
 
+data "aws_acm_certificate" "example" {
+  domain   = "yaelwil.int-devops.click"  # Replace with your domain name
+  statuses = ["ISSUED"]     # Optionally specify status like ISSUED, PENDING_VALIDATION, etc.
+}
+
+
 resource "aws_lb_listener" "listener_8443" {
   load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached
   port            = var.polybot_port
   protocol = "HTTPS" # protocol used by the listener
   ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
   # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
-  certificate_arn   = "arn:aws:acm:eu-west-1:019273956931:certificate/2ab45645-68ce-4fcc-ab67-3920ca759d68"
+  certificate_arn   = data.aws_acm_certificate.example.arn
 
   default_action {
     type = "forward" # matching requests should be forwarded to a target group.
