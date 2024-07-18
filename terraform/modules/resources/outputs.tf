@@ -8,6 +8,11 @@ output "main_vpc_cidr" {
   value       = var.main_vpc_cidr
 }
 
+output "region" {
+  description = "region"
+  value       = var.region
+}
+
 output "main_vpc_id" {
   description = "main_vpc_cidr"
   value       = var.main_vpc_id

@@ -51,6 +51,7 @@ module "resources" {
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
   instance_ids = module.polybot.instance_ids
+  region = var.region
 }
 
 module "yolov5_filters" {

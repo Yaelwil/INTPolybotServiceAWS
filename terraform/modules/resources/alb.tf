@@ -56,24 +56,24 @@ resource "aws_lb_target_group_attachment" "polybot_tg_attachment" {
 # Listeners #
 #############
 
-# resource "aws_lb_listener" "listener_8443" {
-#   load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached
-#   port            = var.polybot_port
-#   protocol = "HTTPS" # protocol used by the listener
-#   ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
-#   # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
-#   certificate_arn   = aws_acm_certificate.certificate_creation.arn
-#
-#   default_action {
-#     type = "forward" # matching requests should be forwarded to a target group.
-#     target_group_arn = aws_lb_target_group.polybot_tg.arn
-#   }
-#
-#   tags = {
-#     Name      = "${var.owner}-listener-${var.project}"
-#     Terraform = "true"
-#     }
-# }
+resource "aws_lb_listener" "listener_8443" {
+  load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached
+  port            = var.polybot_port
+  protocol = "HTTPS" # protocol used by the listener
+  ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
+  # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
+  certificate_arn   = "arn:aws:acm:eu-west-1:019273956931:certificate/2ab45645-68ce-4fcc-ab67-3920ca759d68"
+
+  default_action {
+    type = "forward" # matching requests should be forwarded to a target group.
+    target_group_arn = aws_lb_target_group.polybot_tg.arn
+  }
+
+  tags = {
+    Name      = "${var.owner}-listener-${var.project}"
+    Terraform = "true"
+    }
+}
 
 resource "aws_lb_listener" "listener_80" {
   load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached

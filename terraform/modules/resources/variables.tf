@@ -11,6 +11,10 @@ variable "project" {
   type        = string
 }
 
+variable "region" {
+  description = "region"
+  type        = string
+}
 
 variable "public_key_path" {
   description = "SSH key"

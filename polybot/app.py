@@ -9,6 +9,7 @@ from get_secrets import get_secret
 import results
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
+
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager

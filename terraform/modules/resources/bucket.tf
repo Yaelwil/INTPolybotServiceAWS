@@ -7,7 +7,7 @@ resource "aws_s3_bucket" "project_bucket" {
 #   }
 
   tags = {
-    Name      = "${var.owner}-bucket-${var.project}"
+    Name      = "${var.owner}-bucket-${var.region}-${var.project}"
     Terraform = "true"
   }
 }
