@@ -2,7 +2,8 @@ import os
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
-region_name = os.environ["REGION"]
+# region_name = os.environ["REGION"]
+region_name = "eu-west-2"
 
 
 def get_secret(secret_name):
