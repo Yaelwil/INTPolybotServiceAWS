@@ -1,4 +1,4 @@
-name: Filters Microservice Deployment
+name: Polybot Microservice Deployment
 
 on:
   push:
