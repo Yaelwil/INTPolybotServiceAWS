@@ -67,7 +67,7 @@ jobs:
           EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region ${{ matrix.region }} --filters "Name=tag:Name,Values=*polybot*" "Name=tag:Name,Values=*yaelwil*" "Name=tag:Name,Values=*tf-project*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
       
-          EC2_FILTERS_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
+          EC2_POLYBOT_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
           echo "EC2_POLYBOT_IP_ADDRESSES=$EC2_POLYBOT_IP_ADDRESSES" >> $GITHUB_ENV
 
       - name: Fetch BUCKET_NAME
