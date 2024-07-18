@@ -102,7 +102,7 @@ resource "aws_network_acl_rule" "allow_all_outbound" {
   rule_number    = 100
   protocol       = "tcp"
   rule_action    = "allow"
-  egress         = false
+  egress         = true
   cidr_block     = "0.0.0.0/0"
   from_port      = 0      // Allow all ports from 0
   to_port        = 65535  // Allow all ports up to 65535
