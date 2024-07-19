@@ -61,6 +61,14 @@ data "aws_acm_certificate" "example" {
   statuses = ["ISSUED"]     # Optionally specify status like ISSUED, PENDING_VALIDATION, etc.
 }
 
+resource "aws_acm_certificate" "self_signed" {
+  private_key = tls_private_key.example.private_key_pem
+  certificate_body = tls_self_signed_cert.example.cert_pem
+  tags = {
+    Name = "self-signed-cert"
+  }
+}
+
 
 resource "aws_lb_listener" "listener_8443" {
   load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached
@@ -68,9 +76,10 @@ resource "aws_lb_listener" "listener_8443" {
   protocol = "HTTPS" # protocol used by the listener
   ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
   # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
-  certificate_arn   = data.aws_acm_certificate.example.arn
+#   certificate_arn   = data.aws_acm_certificate.example.arn
+  certificate_arn   =aws_acm_certificate.self_signed.arn
 
-  default_action {
+  default action {
     type = "forward" # matching requests should be forwarded to a target group.
     target_group_arn = aws_lb_target_group.polybot_tg.arn
   }
