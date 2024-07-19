@@ -9,13 +9,13 @@ images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["FILTERS_QUEUE_NAME"]
 region = os.environ["REGION"]
 alb_url = os.environ["ALB_URL"]
-
 # Initialize SQS client, S3 client resources
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 
 
 def consume():
+    logger.debug('Queue is running')
     while True:
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
 

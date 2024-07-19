@@ -32,6 +32,7 @@ BUCKET_NAME = os.environ["BUCKET_NAME"]
 alb_url = os.environ["ALB_URL"]
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
 
+
 # Initialize bot outside of __main__ block
 bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL)
 
