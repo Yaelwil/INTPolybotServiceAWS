@@ -7,12 +7,13 @@ import boto3
 from bot import ObjectDetectionBot
 from get_secrets import get_secret
 import results
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
-secret_name_TELEGRAM_TOKEN = "yaelwil-telegram-token-tf-project"
-secret_name_DOMAIN_CERTIFICATE = "yaelwil-my-certificate-tf-project"
+secret_name_TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
+secret_name_DOMAIN_CERTIFICATE = "CERTIFICATE"
 TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
@@ -20,14 +21,12 @@ if TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
-
 TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 alb_url = os.environ["ALB_URL"]
 print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
-
 domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
 
 with open(domain_certificate_file, 'w') as file:
