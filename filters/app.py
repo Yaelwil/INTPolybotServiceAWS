@@ -14,6 +14,7 @@ alb_url = os.environ["ALB_URL"]
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 
+
 def consume():
     while True:
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
