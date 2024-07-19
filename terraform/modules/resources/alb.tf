@@ -22,7 +22,7 @@ resource "aws_lb" "main-alb" {
 resource "aws_lb_target_group" "polybot_tg" {
   name        = "${var.owner}-tg-${var.project}"
   port        = var.polybot_port
-  protocol    = "HTTP" # Specifies the protocol used for routing traffic to the target instances.
+  protocol    = "HTTPS" # Specifies the protocol used for routing traffic to the target instances.
   vpc_id      = var.main_vpc_id
   target_type = "instance" # Specifies the type of targets registered with this target group.
 
@@ -79,7 +79,7 @@ resource "aws_lb_listener" "listener_8443" {
 #   certificate_arn   = data.aws_acm_certificate.example.arn
   certificate_arn   =aws_acm_certificate.self_signed.arn
 
-  default action {
+  default_action {
     type = "forward" # matching requests should be forwarded to a target group.
     target_group_arn = aws_lb_target_group.polybot_tg.arn
   }

@@ -34,10 +34,6 @@ type        = string
 ##############
 # Other vars #
 ##############
-variable "iam_role" {
-  description = "iam_role"
-type        = string
-}
 
 variable "instance_type" {
   description = "instance_type"

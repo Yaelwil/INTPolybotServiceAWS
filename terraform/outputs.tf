@@ -13,11 +13,6 @@ output "availability_zone_2" {
   value       = var.availability_zone_2
 }
 
-output "iam_role" {
-  description = "iam_role"
-  value       = var.iam_role
-}
-
 output "owner_name" {
   description = "owner"
   value       = var.owner_name

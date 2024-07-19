@@ -1,7 +1,6 @@
 region             = "eu-west-1"
 availability_zone_1 = "eu-west-1a"
 availability_zone_2 = "eu-west-1b"
-iam_role = ""
 instance_type= "t2.micro"
 owner_name = "yaelwil"
 project_name = "tf-project"

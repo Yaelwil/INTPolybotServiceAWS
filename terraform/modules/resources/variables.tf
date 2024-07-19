@@ -33,7 +33,7 @@ variable "main_vpc_id" {
 
 variable "polybot_port" {
   description = "polybot_port"
-  type        = string
+  type        = number
 }
 variable "first_telegram_cidr" {
   description = "first_telegram_cidr"
