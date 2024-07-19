@@ -103,7 +103,7 @@ jobs:
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
           
           # Replace https:// with http:// and append :80
-          ALB_URL_HTTP=$(echo "${{ env.ALB_URL }}" | sed 's#^https://#http://#')
+          ALB_URL_HTTP=$(echo "http://${{ env.ALB_URL }}" | sed 's#^https://#http://#')
           echo "ALB_URL=${ALB_URL_HTTP}:80" >> .env
           
           echo "REGION=${{ matrix.region }}" >> .env
