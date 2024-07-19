@@ -11,11 +11,13 @@ from responses import load_responses
 
 class Bot:
 
-    def __init__(self, token, telegram_chat_url):
+    def __init__(self, token, telegram_chat_url, domain_certificate_file):
         # create a new instance of the TeleBot class.
         # all communication with Telegram servers are done using self.telegram_bot_client
         self.telegram_bot_client = telebot.TeleBot(token)
-        self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60)
+        # set the webhook URL
+        with open(domain_certificate_file, 'rb') as cert:
+            self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}:8443/{token}/', certificate=cert, timeout=60)
         # remove any existing webhooks configured in Telegram servers
         self.telegram_bot_client.remove_webhook()
         time.sleep(0.5)
