@@ -66,15 +66,16 @@ jobs:
         run: |
           EC2_INSTANCE_DETAILS=$(aws ec2 describe-instances --region ${{ matrix.region }} --filters "Name=tag:Name,Values=*yolov5*" "Name=tag:Name,Values=*yaelwil*" "Name=tag:Name,Values=*tf-project*" --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output json)
           echo "$EC2_INSTANCE_DETAILS" > instance_details.json
+          cat instance_details.json
       
           EC2_YOLOV5_IP_ADDRESSES=$(echo "$EC2_INSTANCE_DETAILS" | jq -r '.[][] | select(.[1] == "running") | .[2]' | tr '\n' ' ')
           echo "EC2_YOLOV5_IP_ADDRESSES=$EC2_YOLOV5_IP_ADDRESSES" >> $GITHUB_ENV
+          echo "EC2_YOLOV5_IP_ADDRESSES=$EC2_YOLOV5_IP_ADDRESSES"
 
       - name: Fetch BUCKET_NAME
         run: |
           BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[?contains(Name, 'yaelwil') && contains(Name, 'tf-project') && contains(Name, 'bucket')].Name | [0]" --output text)
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
-
 
       - name: Fetch ALB_URL
         run: |
@@ -86,13 +87,10 @@ jobs:
           DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project')]" --output text)
           echo "DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME" >> $GITHUB_ENV
 
-
-
       - name: Fetch FILTERS_QUEUE_URL
         run: |
           FILTERS_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')]" --output text)
           echo "FILTERS_QUEUE_URL=$FILTERS_QUEUE_URL" >> $GITHUB_ENV
-
 
       - name: Fetch YOLO_QUEUE_URL
         run: |
@@ -108,14 +106,7 @@ jobs:
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
-          
-#          # Replace https:// with http:// and append :80
-#          YOLO_QUEUE_URL_HTTP=$(echo "${{ env.YOLO_QUEUE_URL }}" | sed 's#^https://#http://#')
-#          echo "YOLO_QUEUE_NAME=${YOLO_QUEUE_URL_HTTP}:80" >> .env
-#
-#          # Replace https:// with http:// and append :80
-#          FILTERS_QUEUE_URL_HTTP=$(echo "${{ env.FILTERS_QUEUE_URL }}" | sed 's#^https://#http://#')
-#          echo "FILTERS_QUEUE_NAME=${FILTERS_QUEUE_URL_HTTP}:80" >> .env
+          cat .env  # Debug line to check .env contents
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
@@ -124,17 +115,17 @@ jobs:
           sudo chmod 400 ssh_key.pem
           
           # Split IP addresses into an array
-          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
+          IFS=' ' read -r -a IPS <<< "$EC2_YOLOV5_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Deploying to $IP"
           
             # Copy .env file to EC2 instance
-            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/.env
+            scp -o StrictHostKeyChecking=no -i ssh_key.pem .env ubuntu@$IP:/home/ubuntu/.env || { echo "Failed to copy .env to $IP"; exit 1; }
       
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$IP << EOF
             sudo docker pull $YOLOV5_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
             sudo docker stop yolov5 || true
             sudo docker rm yolov5 || true
-            sudo docker run -d -p 8080:8080 --restart=always --name polybot --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+            sudo docker run -d -p 8080:8080 --restart=always --name yolov5 --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
           EOF
-            done
+          done

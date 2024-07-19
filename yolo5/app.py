@@ -23,7 +23,6 @@ sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb', region_name=region)
 dynamodb_table = dynamodb.Table(dynamodb_table_name)
-
 # Load class names from coco128.yaml
 with open("data/coco128.yaml", "r") as stream:
     names = yaml.safe_load(stream)['names']
