@@ -18,8 +18,6 @@ secret_value_TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
 if secret_value_TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
-    TELEGRAM_TOKEN = json.loads(secret_value_TELEGRAM_TOKEN)['TELEGRAM_TOKEN']
-
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
