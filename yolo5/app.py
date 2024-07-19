@@ -19,6 +19,7 @@ region = os.environ["REGION"]
 dynamodb_table_name = os.environ["DYNAMODB_TABLE_NAME"]
 alb_url = os.environ["ALB_URL"]
 
+
 # Initialize SQS client, S3 client, and DynamoDB resource
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')

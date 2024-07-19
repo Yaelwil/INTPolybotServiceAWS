@@ -136,6 +136,6 @@ jobs:
             sudo docker stop polybot || true
             sudo docker rm polybot || true
             sudo docker run -d -p 8080:8080 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
-            sudo docker system prune -a y
+            sudo docker system prune -a -f || { echo "Failed to prune Docker system on $IP"; exit 1; }
           EOF
             done
