@@ -12,7 +12,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoR
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
-secret_name_TELEGRAM_TOKEN = "yaelwil-telegram-token-tf-project"
+secret_name_TELEGRAM_TOKEN = "yaelwil-token-tf-project"
 secret_name_DOMAIN_CERTIFICATE = "yaelwil-certificate-tf-project"
 TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)

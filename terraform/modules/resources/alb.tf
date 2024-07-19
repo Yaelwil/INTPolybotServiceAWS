@@ -123,7 +123,7 @@ resource "aws_secretsmanager_secret_version" "certificate_version" {
 
 # Store the certificate body in Secrets Manager
 resource "aws_secretsmanager_secret" "telegram_token" {
-  name = "${var.owner}-telegram-token-${var.project}"
+  name = "${var.owner}-token-${var.project}"
   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
 }
 
