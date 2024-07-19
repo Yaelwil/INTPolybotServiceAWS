@@ -22,7 +22,7 @@ resource "aws_lb" "main-alb" {
 resource "aws_lb_target_group" "polybot_tg" {
   name        = "${var.owner}-tg-${var.project}"
   port        = var.polybot_port
-  protocol    = "HTTPS" # Specifies the protocol used for routing traffic to the target instances.
+  protocol    = "HTTP" # Specifies the protocol used for routing traffic to the target instances.
   vpc_id      = var.main_vpc_id
   target_type = "instance" # Specifies the type of targets registered with this target group.
 

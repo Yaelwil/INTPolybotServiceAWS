@@ -10,7 +10,7 @@ import results
 
 app = flask.Flask(__name__)
 
-TELEGRAM_APP_URL = os.environ["ALB_URL"]
+TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]

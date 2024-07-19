@@ -103,19 +103,17 @@ jobs:
         run: |
           echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
-          echo "ALB_URL=https://${{ env.ALB_URL }}" >> .env
+          
+          TELEGRAM_APP_URL= ${{ env.ALB_URL }}
+          
+          # Replace https:// with http:// and append :80
+          ALB_URL_HTTP=$(echo "https://${{ env.ALB_URL }}" | sed 's#^https://#http://#')
+          echo "ALB_URL=${ALB_URL_HTTP}:80" >> .env
+          
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
-
-#          # Replace https:// with http:// and append :80
-#          YOLO_QUEUE_URL_HTTP=$(echo "${{ env.YOLO_QUEUE_URL }}" | sed 's#^https://#http://#')
-#          echo "YOLO_QUEUE_NAME=${YOLO_QUEUE_URL_HTTP}:80" >> .env
-#
-#          # Replace https:// with http:// and append :80
-#          FILTERS_QUEUE_URL_HTTP=$(echo "${{ env.FILTERS_QUEUE_URL }}" | sed 's#^https://#http://#')
-#          echo "FILTERS_QUEUE_NAME=${FILTERS_QUEUE_URL_HTTP}:80" >> .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |

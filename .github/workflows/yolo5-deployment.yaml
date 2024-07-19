@@ -102,8 +102,10 @@ jobs:
           echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
           
+          TELEGRAM_APP_URL= ${{ env.ALB_URL }}
+          
           # Replace https:// with http:// and append :80
-          ALB_URL_HTTP=$(echo "http://${{ env.ALB_URL }}" | sed 's#^https://#http://#')
+          ALB_URL_HTTP=$(echo "https://${{ env.ALB_URL }}" | sed 's#^https://#http://#')
           echo "ALB_URL=${ALB_URL_HTTP}:80" >> .env
           
           echo "REGION=${{ matrix.region }}" >> .env
