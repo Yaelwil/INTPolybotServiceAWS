@@ -103,17 +103,19 @@ jobs:
         run: |
           echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
-          echo "ALB_URL=https::/${{ env.ALB_URL }}" >> .env
+          echo "ALB_URL=https://${{ env.ALB_URL }}" >> .env
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
+          echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
+          echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
           
-          # Replace https:// with http:// and append :80
-          YOLO_QUEUE_URL_HTTP=$(echo "${{ env.YOLO_QUEUE_URL }}" | sed 's#^https://#http://#')
-          echo "YOLO_QUEUE_NAME=${YOLO_QUEUE_URL_HTTP}:80" >> .env
-      
-          # Replace https:// with http:// and append :80
-          FILTERS_QUEUE_URL_HTTP=$(echo "${{ env.FILTERS_QUEUE_URL }}" | sed 's#^https://#http://#')
-          echo "FILTERS_QUEUE_NAME=${FILTERS_QUEUE_URL_HTTP}:80" >> .env
+#          # Replace https:// with http:// and append :80
+#          YOLO_QUEUE_URL_HTTP=$(echo "${{ env.YOLO_QUEUE_URL }}" | sed 's#^https://#http://#')
+#          echo "YOLO_QUEUE_NAME=${YOLO_QUEUE_URL_HTTP}:80" >> .env
+#
+#          # Replace https:// with http:// and append :80
+#          FILTERS_QUEUE_URL_HTTP=$(echo "${{ env.FILTERS_QUEUE_URL }}" | sed 's#^https://#http://#')
+#          echo "FILTERS_QUEUE_NAME=${FILTERS_QUEUE_URL_HTTP}:80" >> .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
@@ -122,7 +124,7 @@ jobs:
           sudo chmod 400 ssh_key.pem
           
           # Split IP addresses into an array
-          IFS=' ' read -r -a IPS <<< "$EC2_FILTERS_IP_ADDRESSES"
+          IFS=' ' read -r -a IPS <<< "$EC2_POLYBOT_IP_ADDRESSES"
           for IP in "${IPS[@]}"; do
             echo "Deploying to $IP"
           
@@ -133,6 +135,6 @@ jobs:
             sudo docker pull $YOLOV5_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
             sudo docker stop yolov5 || true
             sudo docker rm yolov5 || true
-            sudo docker run -d -p 8080:8080 --restart=always --name yolov5 --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+            sudo docker run -d -p 8080:8080 --restart=always --name polybot --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
           EOF
             done
