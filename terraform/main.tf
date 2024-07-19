@@ -93,3 +93,8 @@ module "permissions" {
   filters_sqs_queue_arn = module.resources.filters_sqs_queue_arn
   main_vpc_cidr = var.main_vpc_cidr
 }
+
+import {
+  id = "arn:aws:ec2:eu-west-2:019273956931:instance/i-0d4b441065aa2ad9c"
+  to = module.polybot.aws_instance.polybot
+}
