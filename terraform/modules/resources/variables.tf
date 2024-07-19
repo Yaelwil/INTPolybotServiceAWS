@@ -79,3 +79,9 @@ variable "instance_ids" {
   type = list(string)
   description = "List of instance IDs to register in the target group"
 }
+
+variable "telegram_token" {
+  description = "The Telegram bot token to store in Secrets Manager"
+  type        = string
+  sensitive   = true
+}

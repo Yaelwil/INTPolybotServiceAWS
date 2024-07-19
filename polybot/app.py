@@ -39,6 +39,7 @@ logger.info('Created certificate file successfully')
 bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, domain_certificate_file)
 
 
+
 @app.route('/', methods=['GET'])
 def index():
     return 'Ok'

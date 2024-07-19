@@ -119,8 +119,8 @@ class Bot:
 
 class ObjectDetectionBot(Bot):
 
-    def __init__(self, token, telegram_chat_url):
-        super().__init__(token, telegram_chat_url)
+    def __init__(self, token, telegram_chat_url, domain_certificate_file):
+        super().__init__(token, telegram_chat_url, domain_certificate_file)
         self.responses = load_responses()
 
     def handle_message(self, msg):
