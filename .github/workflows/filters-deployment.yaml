@@ -101,8 +101,9 @@ jobs:
 
       - name: Generate .env file
         run: |
-          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
+          
+          echo "TELEGRAM_APP_URL=${{ env.ALB_URL }}" >> .env
           
           # Replace https:// with http:// and append :80
           ALB_URL_HTTPS=$(echo "https://${{ env.ALB_URL }}:80")

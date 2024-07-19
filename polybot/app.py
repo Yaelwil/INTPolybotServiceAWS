@@ -16,7 +16,6 @@ secret_name_TELEGRAM_TOKEN = "yaelwil-telegram-token-tf-project"
 secret_name_DOMAIN_CERTIFICATE = "yaelwil-my-certificate-tf-project"
 TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
-
 if TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
 else:
