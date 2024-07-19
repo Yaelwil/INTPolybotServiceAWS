@@ -10,20 +10,6 @@ import results
 
 app = flask.Flask(__name__)
 
-
-# # Load TELEGRAM_TOKEN value from Secret Manager
-# secret_name_TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
-# # secret_name_DOMAIN_CERTIFICATE = "CERTIFICATE"
-# secret_value_TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
-# # DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
-#
-# if secret_value_TELEGRAM_TOKEN:
-#     TELEGRAM_TOKEN = json.loads(secret_value_TELEGRAM_TOKEN)['TELEGRAM_TOKEN']
-#
-#     logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
-# else:
-#     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
-
 TELEGRAM_APP_URL = os.environ["ALB_URL"]
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 REGION = os.environ["REGION"]

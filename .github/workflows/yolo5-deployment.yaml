@@ -130,5 +130,6 @@ jobs:
             sudo docker stop yolov5 || true
             sudo docker rm yolov5 || true
             sudo docker run -d -p 8080:8080 --restart=always --name yolov5 --env-file /home/ubuntu/.env $YOLOV5_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+            sudo docker system prune -a y
           EOF
-          done
+            done
