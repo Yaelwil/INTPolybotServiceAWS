@@ -112,7 +112,7 @@ resource "aws_lb_listener" "listener_80" {
 
 # Store the certificate body in Secrets Manager
 resource "aws_secretsmanager_secret" "certificate" {
-  name = "${var.owner}-my-certificate-${var.project}"
+  name = "${var.owner}-certificate-${var.project}"
   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
 }
 

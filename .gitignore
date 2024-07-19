@@ -161,3 +161,4 @@ cython_debug/
 
 terraform.tfstate
 terraform.tfstate.backup
+sensitive_data.tfvars

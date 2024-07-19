@@ -154,3 +154,9 @@ variable "filters_ebs_dev_name" {
   description = "filters_ebs_dev_name"
   type        = string
 }
+
+variable "telegram_token" {
+  description = "The Telegram bot token to store in Secrets Manager"
+  type        = string
+  sensitive   = true
+}

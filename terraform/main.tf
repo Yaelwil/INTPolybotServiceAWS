@@ -52,6 +52,7 @@ module "resources" {
   public_subnet_2_id = module.vpc.public_subnet_id_2
   instance_ids = module.polybot.instance_ids
   region = var.region
+  telegram_token = var.telegram_token
 }
 
 module "yolov5_filters" {
