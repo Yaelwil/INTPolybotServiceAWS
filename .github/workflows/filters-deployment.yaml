@@ -107,8 +107,8 @@ jobs:
           echo "TELEGRAM_APP_URL=${{ env.ALB_URL }}" >> .env
           
           # Replace https:// with http:// and append :80
-          ALB_URL_HTTP=$(echo "https://${{ env.ALB_URL }}" | sed 's#^https://#http://#')
-          echo "ALB_URL=${ALB_URL_HTTP}:80" >> .env
+          ALB_URL_HTTPS=$(echo "https://${{ env.ALB_URL }}:80")
+          echo "ALB_URL=${ALB_URL_HTTPS}" >> .env
           
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
