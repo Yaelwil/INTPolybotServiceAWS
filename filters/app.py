@@ -9,7 +9,6 @@ images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["FILTERS_QUEUE_NAME"]
 region = os.environ["REGION"]
 alb_url = os.environ["ALB_URL"]
-
 # Initialize SQS client, S3 client resources
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')

@@ -101,8 +101,8 @@ jobs:
 
       - name: Generate .env file
         run: |
-          echo "TELEGRAM_TOKEN=${{ secret.TELEGRAM_TOKEN }}" > .env
-          echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" > .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
+          echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
           echo "ALB_URL=https:://${{ env.ALB_URL }}" >> .env
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
