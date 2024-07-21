@@ -12,15 +12,15 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoR
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
-secret_name_TELEGRAM_TOKEN = "yaelwil-token-tf-project"
-secret_name_DOMAIN_CERTIFICATE = "yaelwil-certificate-tf-project"
-TELEGRAM_TOKEN = get_secret(secret_name_TELEGRAM_TOKEN)
+secret_name_TELEGRAM_TOKEN = "yaelwil-telegram-y-token-tf-project"
+secret_name_DOMAIN_CERTIFICATE = "yaelwil-me-certificate-tf-project"
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)
 
-if TELEGRAM_TOKEN and DOMAIN_CERTIFICATE:
-    logger.info('Retrieved TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager')
+if DOMAIN_CERTIFICATE:
+    logger.info('Retrieved DOMAIN_CERTIFICATE from Secrets Manager')
 else:
     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
+TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
 REGION = os.environ["REGION"]
 DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]

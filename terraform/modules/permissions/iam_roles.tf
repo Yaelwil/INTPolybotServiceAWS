@@ -14,7 +14,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 
   tags = {
-    Name      = "${var.owner}-ec2-role-${var.project}"
+    Name      = "${var.owner}-ec2-role-${var.region}-${var.project}"
     Terraform = "true"
   }
 }

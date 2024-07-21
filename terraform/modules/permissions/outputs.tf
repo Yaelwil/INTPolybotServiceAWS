@@ -11,6 +11,11 @@ output "project" {
   value       = var.project
 }
 
+output "region" {
+  description = "region"
+  value       = var.region
+}
+
 #############
 # VPC vars #
 #############
@@ -29,6 +34,8 @@ output "bucket_arn" {
   description = "bucket_arn"
   value        = var.bucket_arn
 }
+
+
 
 #################
 # DynamoDB vars #

@@ -86,9 +86,3 @@ output "instance_ids" {
   description = "List of instance IDs to register in the target group"
   value = var.instance_ids
 }
-
-output "telegram_token" {
-  description = "The Telegram bot token to store in Secrets Manager"
-  value = var.telegram_token
-  sensitive   = true
-}

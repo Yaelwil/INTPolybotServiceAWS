@@ -112,7 +112,7 @@ resource "aws_lb_listener" "listener_80" {
 
 # Store the certificate body in Secrets Manager
 resource "aws_secretsmanager_secret" "certificate" {
-  name = "${var.owner}-certificate-${var.project}"
+  name = "${var.owner}-me-certificate-${var.project}"
   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
 }
 
@@ -121,13 +121,13 @@ resource "aws_secretsmanager_secret_version" "certificate_version" {
   secret_string = tls_self_signed_cert.example.cert_pem
 }
 
-# Store the certificate body in Secrets Manager
-resource "aws_secretsmanager_secret" "telegram_token" {
-  name = "${var.owner}-token-${var.project}"
-  kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
-}
-
-resource "aws_secretsmanager_secret_version" "telegram_token_version" {
-  secret_id     = aws_secretsmanager_secret.telegram_token.id
-  secret_string = var.telegram_token
-}
+# # Store the certificate body in Secrets Manager
+# resource "aws_secretsmanager_secret" "telegram_token" {
+#   name = "${var.owner}-telegram-y-token-${var.project}"
+#   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
+# }
+#
+# resource "aws_secretsmanager_secret_version" "telegram_token_version" {
+#   secret_id     = aws_secretsmanager_secret.telegram_token.id
+#   secret_string = var.telegram_token
+# }

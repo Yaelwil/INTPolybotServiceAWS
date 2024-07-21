@@ -132,9 +132,3 @@ output "filters_ebs_volume_type" {
   description = "filters_ebs_volume_type"
   value       = var.filters_ebs_volume_type
 }
-
-output "telegram_token" {
-  description = "The Telegram bot token to store in Secrets Manager"
-  value = var.telegram_token
-  sensitive   = true
-}

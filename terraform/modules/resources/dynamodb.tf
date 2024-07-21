@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "dynamodb-table" {
-  name           = "${var.owner}-dynamodb-table-${var.project}"
+  name           = "${var.owner}-dynamodb-table-${var.region}-${var.project}"
   billing_mode   = "PAY_PER_REQUEST"  # Adjust based on your requirements
 
   attribute {
@@ -11,7 +11,7 @@ resource "aws_dynamodb_table" "dynamodb-table" {
   hash_key = "prediction_id"  # Partition key
 
   tags = {
-    Name = "${var.owner}-dynamodb-${var.project}"
+    Name = "${var.owner}-dynamodb-${var.region}-${var.project}"
     Terraform = "true"
   }
 }

@@ -31,12 +31,12 @@ resource "aws_iam_role_policy_attachment" "ec2_role_to_route53_policy_attachment
 }
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.owner}-ec2-instance-profile-${var.project}"
+  name = "${var.owner}-ec2-instance-profile-${var.region}-${var.project}"
 
   role = aws_iam_role.ec2_role.name  // Reference to the IAM role name
 
   tags = {
-    Name      = "${var.owner}-ec2-instance-profile-${var.project}"
+    Name      = "${var.owner}-ec2-instance-profile-${var.region}-${var.project}"
     Terraform = "true"
   }
 }
