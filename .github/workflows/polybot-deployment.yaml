@@ -66,27 +66,27 @@ jobs:
       - name: Fetch BUCKET_NAME
         run: |
           BUCKET_NAME=$(aws s3api list-buckets --region ${{ matrix.region }} --query "Buckets[].Name" --output json | jq -r '.[] | select(contains("yaelwil") and endswith("tf-project"))')
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+          echo "BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch ALB_URL
         run: |
           ALB_URL=$(aws elbv2 describe-load-balancers --region ${{ matrix.region }} --query "LoadBalancers[?contains(LoadBalancerName, 'yaelwil') && contains(LoadBalancerName, 'tf-project') && contains(LoadBalancerName, 'alb')].DNSName | [0]" --output text)
-          echo "ALB_URL=$ALB_URL" >> $GITHUB_ENV
+          echo "ALB_URL=$(echo "$ALB_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch DYNAMODB_TABLE_NAME
         run: |
           DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --region ${{ matrix.region }} --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project')]" --output text)
-          echo "DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME" >> $GITHUB_ENV
+          echo "DYNAMODB_TABLE_NAME=$(echo "$DYNAMODB_TABLE_NAME" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch FILTERS_QUEUE_URL
         run: |
           FILTERS_QUEUE_URL=$(aws sqs list-queues --region ${{ matrix.region }} --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')]" --output text)
-          echo "FILTERS_QUEUE_URL=$FILTERS_QUEUE_URL" >> $GITHUB_ENV
+          echo "FILTERS_QUEUE_URL=$(echo "$FILTERS_QUEUE_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch YOLO_QUEUE_URL
         run: |
           YOLO_QUEUE_URL=$(aws sqs list-queues --region ${{ matrix.region }} --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'yolov5')]" --output text)
-          echo "YOLO_QUEUE_URL=$YOLO_QUEUE_URL" >> $GITHUB_ENV
+          echo "YOLO_QUEUE_URL=$(echo "$YOLO_QUEUE_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Generate .env file
         run: |
