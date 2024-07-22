@@ -56,11 +56,6 @@ resource "aws_lb_target_group_attachment" "polybot_tg_attachment" {
 # Listeners #
 #############
 
-# data "aws_acm_certificate" "example" {
-#   domain   = "yaelwil.int-devops.click"  # Replace with your domain name
-#   statuses = ["ISSUED"]     # Optionally specify status like ISSUED, PENDING_VALIDATION, etc.
-# }
-
 resource "aws_acm_certificate" "self_signed" {
   private_key = tls_private_key.example.private_key_pem
   certificate_body = tls_self_signed_cert.example.cert_pem
@@ -105,29 +100,3 @@ resource "aws_lb_listener" "listener_80" {
     Terraform = "true"
     }
 }
-
-###########
-# Secrets #
-###########
-
-# Store the certificate body in Secrets Manager
-resource "aws_secretsmanager_secret" "certificate" {
-  name = "${var.owner}-mi-certificate-${var.project}"
-  kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
-}
-
-resource "aws_secretsmanager_secret_version" "certificate_version" {
-  secret_id     = aws_secretsmanager_secret.certificate.id
-  secret_string = tls_self_signed_cert.example.cert_pem
-}
-
-# # Store the certificate body in Secrets Manager
-# resource "aws_secretsmanager_secret" "telegram_token" {
-#   name = "${var.owner}-telegram-y-token-${var.project}"
-#   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
-# }
-#
-# resource "aws_secretsmanager_secret_version" "telegram_token_version" {
-#   secret_id     = aws_secretsmanager_secret.telegram_token.id
-#   secret_string = var.telegram_token
-# }
