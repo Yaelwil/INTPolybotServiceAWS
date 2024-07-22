@@ -74,19 +74,14 @@ def consume():
 
                 logger.info(f"{alb_url}/results_filter?predictionId={prediction_id}")
 
-            try:
-                if prediction_id:
-                    response = requests.post(f"{alb_url}/results_filter?predictionId={prediction_id}", json=params)
-                    if response.status_code == 200:
-                        logger.info("Successfully sent results to the endpoint")
-                        sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
-                        logger.info('Deleted the job from the queue')
-                    else:
-                        logger.error(f"Failed to send results. Status code: {response.status_code}")
-                else:
-                    logger.error("Empty or missing predictionId")
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Error during POST request: {e}")
+                # perform a GET request to Polybot to /results endpoint
+                response = requests.post(f"{alb_url}/results_filter?predictionId={prediction_id}", json=params)
+                print(response.text)
+
+                logger.info(f"Sending POST request to {alb_url} with params: {params}")
+
+                sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
+                logger.info('Deleted message from the queue')
 
             except Exception as e:
                 logger.error(f'Error processing message: {str(e)}')
