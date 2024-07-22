@@ -34,28 +34,30 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
   description = "Policy for DynamoDB access"
 
   policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
                 "dynamodb:DeleteItem",
                 "dynamodb:UpdateItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetItem",
                 "dynamodb:PutItem"
-        ],
-        #TODO put the required variables
-        Resource = var.dynamodb_table_arn
-        Condition = {
-          IpAddress = {
-            "aws:SourceIp": var.main_vpc_cidr  # Replace with your VPN CIDR block
-          }
+            ],
+            "Resource": var.dynamodb_table_arn
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "dynamodb:ListTables",
+            "Resource": "*"
         }
-      }
     ]
   })
 }
+
 
 ##############################
 # Access to Yolov5 SQS queue #
