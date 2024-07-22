@@ -116,7 +116,7 @@ jobs:
           SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
           
           # Access the secret
-          SECRET_VALUE=${{ secrets[SECRET_NAME] }}
+          SECRET_VALUE=${{ secrets.${SECRET_NAME} }}
           
           # Write to .env file
           echo "TELEGRAM_TOKEN=${SECRET_VALUE}" >> .env
