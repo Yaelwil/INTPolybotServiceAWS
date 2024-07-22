@@ -27,7 +27,6 @@ def consume():
             logger.info(f'Raw message body: {message_body}')
 
             try:
-
                 # Split the message body by commas and extract the relevant fields
                 chat_id, photo_caption, full_s3_path, img_name = message_body.split(', ')
             except ValueError as e:
