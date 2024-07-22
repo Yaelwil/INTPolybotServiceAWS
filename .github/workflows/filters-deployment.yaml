@@ -106,7 +106,14 @@ jobs:
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
-          echo "TELEGRAM_TOKEN=${{ env.TELEGRAM_TOKEN }}" >> .env
+
+          if [ "${{ matrix.region }}" == "eu-west-1" ]; then
+            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_eu_west_1 }}" >> .env
+          elif [ "${{ matrix.region }}" == "us-west-1" ]; then
+            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_us_west_1 }}" >> .env
+          else
+            echo "Region ${matrix.region} is not recognized"
+          fi
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
