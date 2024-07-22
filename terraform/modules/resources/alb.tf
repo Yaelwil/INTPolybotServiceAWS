@@ -31,7 +31,7 @@ resource "aws_lb_target_group" "polybot_tg" {
     unhealthy_threshold = 3
     timeout             = 5 # in seconds
     interval            = 30 # in seconds
-    path                = "/health_checks"
+    path                = "/health_checks/"
     matcher             = "200" # HTTP response status code that is considered healthy
   }
 
