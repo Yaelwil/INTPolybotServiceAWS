@@ -72,8 +72,14 @@ jobs:
 
       - name: Fetch BUCKET_NAME
         run: |
-          BUCKET_NAME=$(aws s3api list-buckets --region ${{ matrix.region }} --query "Buckets[].Name" --output json | jq -r '.[] | select(contains("yaelwil") and endswith("tf-project"))')
-          echo "BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '\n')" >> $GITHUB_ENV
+              # Fetch the list of buckets
+              BUCKETS_JSON=$(aws s3api list-buckets --region ${{ matrix.region }} --query "Buckets[].Name" --output json)
+          
+              # Filter for the bucket that matches the region string
+              BUCKET_NAME=$(echo "$BUCKETS_JSON" | jq -r '.[] | select(contains("yaelwil") and contains("tf-project") and contains("'"${{ matrix.region }}"'))')
+          
+              # Trim any potential newlines and set the environment variable
+              echo "BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch ALB_URL
         run: |
