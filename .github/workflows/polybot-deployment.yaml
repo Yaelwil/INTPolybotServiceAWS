@@ -40,15 +40,8 @@ jobs:
       AWS_REGION: ${{ matrix.region }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-      ALB_URL: ${{ secrets.ALB_URL }}
-      DYNAMODB_TABLE_NAME: ${{ secrets.DYNAMODB_TABLE_NAME }}
-      FILTERS_QUEUE_URL: ${{ secrets.FILTERS_QUEUE_URL }}
-      YOLO_QUEUE_URL: ${{ secrets.YOLO_QUEUE_URL }}
-      EC2_INSTANCE_IDS: ${{ secrets.EC2_INSTANCE_IDS }}
-      EC2_FILTERS_IP_ADDRESSES: ${{ secrets.EC2_FILTERS_IP_ADDRESSES }}
-      NEW_RUNNING_INSTANCE_IPS: ${{ secrets.NEW_RUNNING_INSTANCE_IPS }}
-      KEY: ${{ secrets.TF_PROJECT_PRIVATE_KEY }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TF_PROJECT_PRIVATE_KEY: ${{ secrets.TF_PROJECT_PRIVATE_KEY }}
 
     steps:
       - name: Checkout the repo code
@@ -106,7 +99,7 @@ jobs:
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
-          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
+          echo "TELEGRAM_TOKEN=${{ env.TELEGRAM_TOKEN }}" >> .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
@@ -126,7 +119,7 @@ jobs:
             sudo docker pull $POLYBOT_IMAGE_NAME || { echo "Failed to pull image on $IP"; exit 1; }
             sudo docker stop polybot || true
             sudo docker rm polybot || true
-            sudo docker run -d -p 8080:8080 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
+            sudo docker run -d -p 8443:8443 --restart=always --name polybot --env-file /home/ubuntu/.env $POLYBOT_IMAGE_NAME || { echo "Failed to run container on $IP"; exit 1; }
             sudo docker system prune -a -f || { echo "Failed to prune Docker system on $IP"; exit 1; }
           EOF
             done
