@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        region: ['eu-west-1']
+        region: ['eu-west-1', 'us-east-1']
         # Add your desired regions here
 
     env:
@@ -111,6 +111,7 @@ jobs:
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
+          echo "TELEGRAM_TOKEN = ${{ secrets.TELEGRAM_TOKEN }}" >> .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |

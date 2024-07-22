@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "project_bucket" {
-  bucket = "${var.owner}-bucket-${var.project}"
+  bucket = "${var.owner}-bucket-${var.region}-${var.project}"
   acl    = "private"
 
 #   lifecycle {
