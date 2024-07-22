@@ -107,13 +107,22 @@ jobs:
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
 
-          if [ "${{ matrix.region }}" == "eu-west-1" ]; then
-            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_eu_west_1 }}" >> .env
-          elif [ "${{ matrix.region }}" == "us-west-1" ]; then
-            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_us_west_1 }}" >> .env
-          else
-            echo "Region ${matrix.region} is not recognized"
-          fi
+          REGION=${{ matrix.region }}
+          
+          # Convert region to uppercase and replace '-' with '_'
+          UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
+          
+          # Construct the secret name
+          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
+          
+          # Access the secret
+          SECRET_VALUE=${{ secrets[SECRET_NAME] }}
+          
+          # Write to .env file
+          echo "TELEGRAM_TOKEN=${SECRET_VALUE}" >> .env
+          
+          # Optional: Print the .env file for debugging purposes
+          cat .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
