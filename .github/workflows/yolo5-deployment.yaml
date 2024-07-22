@@ -102,8 +102,8 @@ jobs:
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
           echo "TELEGRAM_APP_URL=${{ env.ALB_URL }}" >> .env
           # Replace https:// with http:// and append :80
-          ALB_URL_HTTPS=$(echo "https://${{ env.ALB_URL }}:80")
-          echo "ALB_URL=${ALB_URL_HTTPS}" >> .env
+          ALB_URL_HTTP=$(echo "http://${{ env.ALB_URL }}:80")
+          echo "ALB_URL=${ALB_URL_HTTP}" >> .env
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env

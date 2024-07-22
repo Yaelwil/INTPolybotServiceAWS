@@ -5,27 +5,25 @@ resource "aws_iam_policy" "s3_access_policy" {
   name        = "${var.owner}-bucket-policy-${var.region}-${var.project}"
   description = "Policy for s3 access"
   policy      = jsonencode({
-    Version   = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
                 "s3:PutObject",
                 "s3:GetObject",
                 "s3:ListBucket"
-        ],
-        Resource = [
-          var.bucket_arn
-        ],
-        Condition = {
-          IpAddress = {
-            "aws:SourceIp" : var.main_vpc_cidr
-          }
+            ],
+            "Resource": [
+                var.bucket_arn,
+                "${var.bucket_arn}/*"
+            ]
         }
-      }
     ]
   })
 }
+
 
 #######################
 # Access to DynamoDB #
