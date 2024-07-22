@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        region: ['eu-west-1', 'us-east-1']
+        region: ['eu-west-1']
         # Add your desired regions here
 
     env:

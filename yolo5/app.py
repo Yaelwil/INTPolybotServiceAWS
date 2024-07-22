@@ -7,8 +7,6 @@ import os
 import boto3
 import requests
 import json
-import uuid
-from decimal import Decimal, ROUND_HALF_UP
 from json_praising import PraisingJSON
 from dynamodb_save import store_results_in_dynamodb
 
