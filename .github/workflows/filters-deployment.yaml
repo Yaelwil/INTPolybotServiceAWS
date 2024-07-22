@@ -102,18 +102,15 @@ jobs:
       - name: Generate .env file
         run: |
           echo "BUCKET_NAME=${{ env.BUCKET_NAME }}" >> .env
-          
           echo "TELEGRAM_APP_URL=${{ env.ALB_URL }}" >> .env
-          
           # Replace https:// with http:// and append :80
           ALB_URL_HTTPS=$(echo "https://${{ env.ALB_URL }}:80")
           echo "ALB_URL=${ALB_URL_HTTPS}" >> .env
-          
           echo "REGION=${{ matrix.region }}" >> .env
           echo "DYNAMODB_TABLE_NAME=${{ env.DYNAMODB_TABLE_NAME }}" >> .env
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
-          echo "TELEGRAM_TOKEN = ${{ secrets.TELEGRAM_TOKEN }}" >> .env
+          echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}" >> .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
