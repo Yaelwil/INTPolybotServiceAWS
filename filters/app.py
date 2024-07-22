@@ -85,6 +85,9 @@ def consume():
                         logger.error(f"Failed to send results. Status code: {response.status_code}")
                 else:
                     logger.error("Empty or missing predictionId")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error during POST request: {e}")
+
             except Exception as e:
                 logger.error(f'Error processing message: {str(e)}')
                 sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=receipt_handle)
