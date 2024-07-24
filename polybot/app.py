@@ -1,4 +1,3 @@
-import json
 import os
 from loguru import logger
 import flask
@@ -7,7 +6,6 @@ import boto3
 from bot import ObjectDetectionBot
 from get_secrets import get_secret
 import results
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError, NoRegionError, ClientError
 
 app = flask.Flask(__name__)
 
