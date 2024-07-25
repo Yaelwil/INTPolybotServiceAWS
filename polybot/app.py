@@ -7,6 +7,7 @@ from bot import ObjectDetectionBot
 from get_secrets import get_secret
 import results
 
+
 app = flask.Flask(__name__)
 
 # Load TELEGRAM_TOKEN value from Secret Manager
