@@ -110,8 +110,16 @@ jobs:
 
           REGION=${{ matrix.region }}
           UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
-          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
+
+          # Use predefined secret names based on region
+          if [[ "$REGION" == "eu-west-1" ]]; then
+            SECRET_NAME="TELEGRAM_TOKEN_EU_WEST_1"
+          elif [[ "$REGION" == "us-east-1" ]]; then
+            SECRET_NAME="TELEGRAM_TOKEN_US_EAST_1"
+          fi
+
           echo "Using secret for region ${REGION}"
+
           # Access the secret value and print it to the .env file
           SECRET_VALUE=${{ secrets[SECRET_NAME] }}
           if [[ -n "$SECRET_VALUE" ]]; then
