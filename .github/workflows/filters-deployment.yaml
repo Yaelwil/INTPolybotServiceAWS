@@ -115,17 +115,19 @@ jobs:
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
 
-          # Convert matrix.region to uppercase and replace '-' with '_'
-          REGION=${{ matrix.region }}
-          UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
+          REGION="${{ matrix.region }}"
           
-          # Set the secret name based on the uppercase region
-          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
-
-          # Access the secret value and print it to the .env file
-          echo "Using secret for region ${REGION}"
-          echo "TELEGRAM_TOKEN=${{ secrets['TELEGRAM_TOKEN_${UPPER_REGION}'] }}" >> .env
-
+          if [ "$REGION" == "eu-west-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
+          elif [ "$REGION" == "us-east-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
+          else
+            SECRET_VALUE="UNKNOWN"
+          fi
+        
+          # Create or update the .env file
+          echo "TELEGRAM_TOKEN=$SECRET_VALUE" >> .env
+      
           # Optionally, print the .env file for debugging purposes
           cat .env
 

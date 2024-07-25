@@ -10,6 +10,7 @@ import json
 from json_praising import PraisingJSON
 from dynamodb_save import store_results_in_dynamodb
 
+
 # Load environment variables
 images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["YOLO_QUEUE_NAME"]
