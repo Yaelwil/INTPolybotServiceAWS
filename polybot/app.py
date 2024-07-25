@@ -9,6 +9,7 @@ import results
 
 app = flask.Flask(__name__)
 
+
 # Load TELEGRAM_TOKEN value from Secret Manager
 secret_name_DOMAIN_CERTIFICATE = "yaelwil-mn-certificate-tf-project"
 DOMAIN_CERTIFICATE = get_secret(secret_name_DOMAIN_CERTIFICATE)

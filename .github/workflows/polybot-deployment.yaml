@@ -117,7 +117,7 @@ jobs:
 
           # Access the secret value and print it to the .env file
           echo "Using secret for region ${REGION}"
-          echo "TELEGRAM_TOKEN=${{ secrets['TELEGRAM_TOKEN_${UPPER_REGION}'] }}" > .env
+          echo "TELEGRAM_TOKEN=${{ secrets['TELEGRAM_TOKEN_${UPPER_REGION}'] }}" >> .env
 
           # Optionally, print the .env file for debugging purposes
           cat .env
