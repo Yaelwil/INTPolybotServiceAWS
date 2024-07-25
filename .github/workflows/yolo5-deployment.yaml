@@ -74,28 +74,36 @@ jobs:
 
       - name: Fetch BUCKET_NAME
         run: |
-          BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[?contains(Name, 'yaelwil') && contains(Name, 'tf-project') && contains(Name, 'bucket')].Name | [0]" --output text)
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+          # Fetch the list of buckets
+          BUCKETS_JSON=$(aws s3api list-buckets --region ${{ matrix.region }} --query "Buckets[].Name" --output json)
+          
+          # Filter for the bucket that matches the region string
+          BUCKET_NAME=$(echo "$BUCKETS_JSON" | jq -r --arg region "${{ matrix.region }}" '.[] | select(contains("yaelwil") and contains("tf-project") and contains($region))')
+          
+          # Trim any potential newlines and set the environment variable
+          echo "BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '\n')" >> $GITHUB_ENV
+
+
 
       - name: Fetch ALB_URL
         run: |
-          ALB_URL=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?contains(LoadBalancerName, 'yaelwil') && contains(LoadBalancerName, 'tf-project') && contains(LoadBalancerName, 'alb')].DNSName | [0]" --output text)
-          echo "ALB_URL=$ALB_URL" >> $GITHUB_ENV
+          ALB_URL=$(aws elbv2 describe-load-balancers --region ${{ matrix.region }} --query "LoadBalancers[?contains(LoadBalancerName, 'yaelwil') && contains(LoadBalancerName, 'tf-project') && contains(LoadBalancerName, 'alb')].DNSName | [0]" --output text)
+          echo "ALB_URL=$(echo "$ALB_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch DYNAMODB_TABLE_NAME
         run: |
-          DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project')]" --output text)
-          echo "DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME" >> $GITHUB_ENV
+          DYNAMODB_TABLE_NAME=$(aws dynamodb list-tables --region ${{ matrix.region }} --query "TableNames[?contains(@, 'yaelwil') && contains(@, 'tf-project')]" --output text)
+          echo "DYNAMODB_TABLE_NAME=$(echo "$DYNAMODB_TABLE_NAME" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch FILTERS_QUEUE_URL
         run: |
-          FILTERS_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')]" --output text)
-          echo "FILTERS_QUEUE_URL=$FILTERS_QUEUE_URL" >> $GITHUB_ENV
+          FILTERS_QUEUE_URL=$(aws sqs list-queues --region ${{ matrix.region }} --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'filters')]" --output text)
+          echo "FILTERS_QUEUE_URL=$(echo "$FILTERS_QUEUE_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Fetch YOLO_QUEUE_URL
         run: |
-          YOLO_QUEUE_URL=$(aws sqs list-queues --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'yolov5')]" --output text)
-          echo "YOLO_QUEUE_URL=$YOLO_QUEUE_URL" >> $GITHUB_ENV
+          YOLO_QUEUE_URL=$(aws sqs list-queues --region ${{ matrix.region }} --query "QueueUrls[?contains(@, 'yaelwil') && contains(@, 'tf-project') && contains(@, 'yolov5')]" --output text)
+          echo "YOLO_QUEUE_URL=$(echo "$YOLO_QUEUE_URL" | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Generate .env file
         run: |
@@ -109,13 +117,19 @@ jobs:
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
 
-          if [ "${{ matrix.region }}" == "eu-west-1" ]; then
-            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_eu_west_1 }}" >> .env
-          elif [ "${{ matrix.region }}" == "us-west-1" ]; then
-            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_us_west_1 }}" >> .env
-          else
-            echo "Region ${matrix.region} is not recognized"
-          fi
+          # Convert matrix.region to uppercase and replace '-' with '_'
+          REGION=${{ matrix.region }}
+          UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
+          
+          # Set the secret name based on the uppercase region
+          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
+
+          # Access the secret value and print it to the .env file
+          echo "Using secret for region ${REGION}"
+          echo "TELEGRAM_TOKEN=${{ secrets['TELEGRAM_TOKEN_${UPPER_REGION}'] }}" > .env
+
+          # Optionally, print the .env file for debugging purposes
+          cat .env
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |

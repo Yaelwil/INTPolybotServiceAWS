@@ -13,7 +13,6 @@ alb_url = os.environ["ALB_URL"]
 sqs_client = boto3.client('sqs', region_name=region)
 s3 = boto3.client('s3')
 
-
 def consume():
     logger.debug('Queue is running')
     while True:
