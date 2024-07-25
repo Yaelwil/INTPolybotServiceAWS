@@ -110,13 +110,11 @@ jobs:
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
 
-          REGION="${{ matrix.region }}"
-          UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
-          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
-        
-          echo TELEGRAM_TOKEN=${{ env.SECRET_NAME }} >> .env
+          if ${{ matrix.region }} == 'eu-west-1':
+            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}" >> .env
+          elif ${{ matrix.region }} == 'us-east-1':
+            echo "TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}" >> .env
       
-
           # Optionally, print the .env file for debugging purposes
           cat .env
 
