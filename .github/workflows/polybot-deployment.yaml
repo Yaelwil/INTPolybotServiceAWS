@@ -112,33 +112,14 @@ jobs:
 
           REGION="${{ matrix.region }}"
           UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
-          
-          echo "Transformed Region: $UPPER_REGION"
-          
-          # Define the secret name based on the transformed region
           SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
           
-          echo "Secret Name: $SECRET_NAME"
-          
-          # Define environment variables for secrets (for local testing only)
-          # In CI/CD, this should be set through the workflow environment.
-          export TELEGRAM_TOKEN_EU_WEST_1="your_eu_west_1_secret_value"
-          export TELEGRAM_TOKEN_US_EAST_1="your_us_east_1_secret_value"
-          
-          # Access the secret value
-          SECRET_VALUE="${!SECRET_NAME}"
-          
-          echo "Secret Value: $SECRET_VALUE"
-          
-          # Output the results
-          if [[ -n "$SECRET_VALUE" ]]; then
-            echo "TELEGRAM_TOKEN=$SECRET_VALUE" > .env
-            echo "Created .env file with the following content:"
-            cat .env
-          else
-            echo "Secret ${SECRET_NAME} not found"
-          fi
-
+          # Retrieve the secret value using GitHub Actions environment variables
+          SECRET_VALUE="${{ secrets[SECRET_NAME] }}"
+  
+          # Create or update the .env file
+          echo "TELEGRAM_TOKEN=$SECRET_VALUE" >> .env
+      
 
           # Optionally, print the .env file for debugging purposes
           cat .env
