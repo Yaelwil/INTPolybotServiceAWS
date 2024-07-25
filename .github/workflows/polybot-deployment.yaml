@@ -42,6 +42,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TF_PROJECT_PRIVATE_KEY: ${{ secrets.TF_PROJECT_PRIVATE_KEY }}
+      TELEGRAM_TOKEN_EU_WEST_1: ${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}
+      TELEGRAM_TOKEN_US_EAST_1: ${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}
 
     steps:
       - name: Checkout the repo code
@@ -108,24 +110,25 @@ jobs:
           echo "YOLO_QUEUE_NAME=${{ env.YOLO_QUEUE_URL }}" >> .env
           echo "FILTERS_QUEUE_NAME=${{ env.FILTERS_QUEUE_URL }}" >> .env
 
-          REGION=${{ matrix.region }}
+          REGION="${{ matrix.region }}"
           UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
           
-          echo $UPPER_REGION
+          echo "Transformed Region: $UPPER_REGION"
           
           # Define the secret name based on the transformed region
           SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
           
-          echo $SECRET_NAME
+          echo "Secret Name: $SECRET_NAME"
           
-          # Simulate setting a secret value (replace this with the actual secret value or use GitHub CLI)
-          export TELEGRAM_TOKEN_EU_WEST_1="1234"  # Replace with actual value or method to retrieve secrets
-          
+          # Define environment variables for secrets (for local testing only)
+          # In CI/CD, this should be set through the workflow environment.
+          export TELEGRAM_TOKEN_EU_WEST_1="your_eu_west_1_secret_value"
+          export TELEGRAM_TOKEN_US_EAST_1="your_us_east_1_secret_value"
           
           # Access the secret value
           SECRET_VALUE="${!SECRET_NAME}"
           
-          echo $SECRET_VALUE
+          echo "Secret Value: $SECRET_VALUE"
           
           # Output the results
           if [[ -n "$SECRET_VALUE" ]]; then
