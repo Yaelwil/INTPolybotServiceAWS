@@ -110,23 +110,32 @@ jobs:
 
           REGION=${{ matrix.region }}
           UPPER_REGION=$(echo "$REGION" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')
-
-          # Use predefined secret names based on region
-          if [[ "$REGION" == "eu-west-1" ]]; then
-            SECRET_NAME="TELEGRAM_TOKEN_EU_WEST_1"
-          elif [[ "$REGION" == "us-east-1" ]]; then
-            SECRET_NAME="TELEGRAM_TOKEN_US_EAST_1"
-          fi
-
-          echo "Using secret for region ${REGION}"
-
-          # Access the secret value and print it to the .env file
-          SECRET_VALUE=${{ secrets[SECRET_NAME] }}
+          
+          echo $UPPER_REGION
+          
+          # Define the secret name based on the transformed region
+          SECRET_NAME="TELEGRAM_TOKEN_${UPPER_REGION}"
+          
+          echo $SECRET_NAME
+          
+          # Simulate setting a secret value (replace this with the actual secret value or use GitHub CLI)
+          export TELEGRAM_TOKEN_EU_WEST_1="1234"  # Replace with actual value or method to retrieve secrets
+          
+          
+          # Access the secret value
+          SECRET_VALUE="${!SECRET_NAME}"
+          
+          echo $SECRET_VALUE
+          
+          # Output the results
           if [[ -n "$SECRET_VALUE" ]]; then
-            echo "TELEGRAM_TOKEN=$SECRET_VALUE" >> .env
+            echo "TELEGRAM_TOKEN=$SECRET_VALUE" > .env
+            echo "Created .env file with the following content:"
+            cat .env
           else
             echo "Secret ${SECRET_NAME} not found"
           fi
+
 
           # Optionally, print the .env file for debugging purposes
           cat .env
