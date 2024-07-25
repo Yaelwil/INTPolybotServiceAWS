@@ -55,16 +55,6 @@ resource "aws_lb_target_group_attachment" "polybot_tg_attachment" {
 #############
 # Listeners #
 #############
-
-resource "aws_acm_certificate" "self_signed" {
-  private_key = tls_private_key.example.private_key_pem
-  certificate_body = tls_self_signed_cert.example.cert_pem
-  tags = {
-    Name = "self-signed-cert"
-  }
-}
-
-
 resource "aws_lb_listener" "listener_8443" {
   load_balancer_arn = aws_lb.main-alb.arn # ARN of the ALB to which this listener is attached
   port            = var.polybot_port
