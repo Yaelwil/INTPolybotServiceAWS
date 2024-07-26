@@ -9,6 +9,14 @@ import results
 from get_cert import get_cert
 
 app = flask.Flask(__name__)
+REGION = os.environ["REGION"]
+TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
+TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
+DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
+BUCKET_NAME = os.environ["BUCKET_NAME"]
+alb_url = os.environ["ALB_URL"]
+print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
+
 
 # # Load TELEGRAM_TOKEN value from Secret Manager
 # secret_name_DOMAIN_CERTIFICATE = "yaelwil-mn-certificate-tf-project"
@@ -19,26 +27,30 @@ app = flask.Flask(__name__)
 # else:
 #     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
 
-prefix = "yaelwil"
-DOMAIN_CERTIFICATE = get_cert(prefix)
+prefix_1 = "yaelwil_certificate"
+prefix_2 = "TELEGRAM_TOKEN_EU_WEST_1"
+prefix_3 = "TELEGRAM_TOKEN_US_EAST_1"
+DOMAIN_CERTIFICATE = get_cert(prefix_1)
+TELEGRAM_TOKEN_EU_WEST_1 = get_cert(prefix_2)
+TELEGRAM_TOKEN_US_EAST_1 = get_cert(prefix_3)
 
 if DOMAIN_CERTIFICATE:
     logger.info('Retrieved DOMAIN_CERTIFICATE from Secrets Manager')
 else:
     raise ValueError("Failed to retrieve secret DOMAIN_CERTIFICATE from Secrets Manager")
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-TELEGRAM_APP_URL = os.environ["TELEGRAM_APP_URL"]
-REGION = os.environ["REGION"]
-DYNAMODB_TABLE_NAME = os.environ["DYNAMODB_TABLE_NAME"]
-BUCKET_NAME = os.environ["BUCKET_NAME"]
-alb_url = os.environ["ALB_URL"]
-print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
+
 domain_certificate_file = 'DOMAIN_CERTIFICATE.pem'
 
 with open(domain_certificate_file, 'w') as file:
     file.write(DOMAIN_CERTIFICATE)
 
 logger.info('Created certificate file successfully')
+
+# Make sure to use the correct variable
+region_upper = REGION.upper()
+# Example of constructing variable name dynamically (Note: this may need adjustment based on how tokens are handled)
+telegram_token_env_var = f"TELEGRAM_TOKEN_{region_upper}"
+TELEGRAM_TOKEN = os.environ.get(telegram_token_env_var)
 
 # Initialize bot outside of __main__ block
 bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, domain_certificate_file)

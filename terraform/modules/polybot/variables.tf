@@ -71,3 +71,33 @@ variable "public_subnet_2" {
   description = "public_subnet_2_id"
   type        = string
 }
+
+variable "bucket_name" {
+  description = "bucket name"
+  type        = string
+}
+
+variable "alb_url" {
+  description = "alb_url"
+  type        = string
+}
+
+variable "dynamodb_table_name" {
+  description = "dynamodb_table_name"
+  type        = string
+}
+
+variable "filters_queue_url" {
+  description = "filters_queue_url"
+  type        = string
+}
+
+variable "yolo_queue_url" {
+  description = "yolo_queue_url"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "aws_region"
+  type        = string
+}

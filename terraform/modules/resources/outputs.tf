@@ -86,3 +86,28 @@ output "instance_ids" {
   description = "List of instance IDs to register in the target group"
   value = var.instance_ids
 }
+
+output "bucket_name" {
+  description = "bucket name"
+  value       = aws_s3_bucket.project_bucket.bucket
+}
+
+output "alb_url" {
+  description = "SSH key"
+  value       = aws_lb.main-alb.dns_name
+}
+
+output "dynamodb_table_name" {
+  description = "dynamodb_table_name"
+  value       = aws_dynamodb_table.dynamodb-table.name
+}
+
+output "filters_queue_url" {
+  description = "filters_queue_url"
+  value       = aws_sqs_queue.filters_sqs_queue.url
+}
+
+output "yolo_queue_url" {
+  description = "yolo_queue_url"
+  value       = aws_sqs_queue.yolov5_sqs_queue.url
+}
