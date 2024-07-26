@@ -131,6 +131,13 @@ jobs:
           # Optionally, print the .env file for debugging purposes
           cat .env
 
+      - name: Upload .env to S3
+        run: |
+          aws s3 cp .env s3://${{ env.BUCKET_NAME }}/ENV/.env
+
+      - name: Clean up
+        run: rm .env
+
 
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
