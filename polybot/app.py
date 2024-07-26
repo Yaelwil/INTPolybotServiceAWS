@@ -27,10 +27,10 @@ print(f"TELEGRAM_APP_URL: {TELEGRAM_APP_URL}")
 # else:
 #     raise ValueError("Failed to retrieve secret TELEGRAM_TOKEN and DOMAIN_CERTIFICATE from Secrets Manager")
 
-prefix_1 = "yaelwil-certificate"
+prefix = "yaelwil-certificate"
 secret_name_1 = "TELEGRAM_TOKEN_EU_WEST_1"
 secret_name_2 = "TELEGRAM_TOKEN_US_EAST_1"
-DOMAIN_CERTIFICATE = get_cert(prefix_1)
+DOMAIN_CERTIFICATE = get_cert(prefix)
 TELEGRAM_TOKEN_EU_WEST_1 = get_secret(secret_name_1)
 TELEGRAM_TOKEN_US_EAST_1 = get_secret(secret_name_2)
 
