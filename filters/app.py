@@ -18,6 +18,7 @@ def consume():
     logger.debug('Queue is running')
     while True:
         response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5)
+
         if 'Messages' in response:
             message_body = response['Messages'][0]['Body']
             receipt_handle = response['Messages'][0]['ReceiptHandle']
