@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload .env to S3
         run: |
-          aws s3 cp .env s3://${{ env.BUCKET_NAME }}/ENV/.env
+          aws s3 cp .env s3://yaelwil-bucket-tf-project-var-file/.env
 
       - name: Clean up
         run: rm .env
