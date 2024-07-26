@@ -17,27 +17,6 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Navigate to the directory containing Terraform configuration if necessary
-cd ../..
-
-# Fetch Terraform outputs
-AWS_REGION=$(terraform output -raw region)
-BUCKET_NAME=$(terraform output -raw bucket_name)
-ALB_URL=$(terraform output -raw alb_url)
-DYNAMODB_TABLE_NAME=$(terraform output -raw dynamodb_table_name)
-FILTERS_QUEUE_URL=$(terraform output -raw filters_queue_url)
-YOLO_QUEUE_URL=$(terraform output -raw yolo_queue_url)
-
-# Create or update .env file
-cat <<EOF > .env
-AWS_REGION=$AWS_REGION
-BUCKET_NAME=$BUCKET_NAME
-ALB_URL=$ALB_URL
-DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME
-FILTERS_QUEUE_URL=$FILTERS_QUEUE_URL
-YOLO_QUEUE_URL=$YOLO_QUEUE_URL
-EOF
-
 # Fetch tags using Docker Hub API and select the latest tag
 IMAGE_NAME="yaeli1/polybot"
 PAGE_SIZE=100
