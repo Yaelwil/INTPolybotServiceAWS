@@ -4,20 +4,20 @@ import os
 # region_name = os.environ["REGION"]
 region_name = os.environ["REGION"]
 
-
 def get_cert(prefix):
     # Create a Secrets Manager client
     client = boto3.client('secretsmanager', region_name=region_name)
 
     try:
-        # List all secrets
-        response = client.list_secrets()
+        # Initialize an empty list to hold matching secrets
+        matching_secrets = []
 
-        # Extract the secret names that match the prefix
-        matching_secrets = [
-            secret['Name'] for secret in response['SecretList']
-            if secret['Name'].startswith(prefix)
-        ]
+        # List all secrets with pagination
+        paginator = client.get_paginator('list_secrets')
+        for page in paginator.paginate():
+            for secret in page['SecretList']:
+                if secret['Name'].startswith(prefix):
+                    matching_secrets.append(secret['Name'])
 
         # If any matching secrets are found, retrieve and return the first one
         if matching_secrets:
