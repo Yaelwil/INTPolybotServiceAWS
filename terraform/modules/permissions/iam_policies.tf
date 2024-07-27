@@ -18,8 +18,8 @@ resource "aws_iam_policy" "s3_access_policy" {
             "Resource": [
                 var.bucket_arn,
                 "${var.bucket_arn}/*",
-                "arn:aws:s3:::yaelwil-bucket-tf-project-var-file",
-                "arn:aws:s3:::yaelwil-bucket-tf-project-var-file/*",
+                "arn:aws:s3:::yaelwil-bucket-tf-project-tfstate-file",
+                "arn:aws:s3:::yaelwil-bucket-tf-project-tfstate-file/*",
 
             ]
         }
