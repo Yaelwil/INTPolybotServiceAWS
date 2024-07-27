@@ -1,4 +1,3 @@
-
 name: Polybot Infrastructure Terraform Specific Region
 
 on:
@@ -29,7 +28,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ matrix.region }}
+          aws-region: REGION
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
@@ -50,16 +49,16 @@ jobs:
 
       - name: Terraform plan
         run: | 
-          REGION="${{ matrix.region }}"
-          
-          if [ "$REGION" == "eu-west-1" ]; then
-            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
-          elif [ "$REGION" == "us-east-1" ]; then
-            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
-          else
-            SECRET_VALUE="UNKNOWN"
-          fi
-          
+#          REGION="${{ matrix.region }}"
+#
+#          if [ "$REGION" == "eu-west-1" ]; then
+#            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
+#          elif [ "$REGION" == "us-east-1" ]; then
+#            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
+#          else
+#            SECRET_VALUE="UNKNOWN"
+#          fi
+#
           export TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}
           terraform plan -var-file=region.${{ inputs.region-code }}.tfvars
 
