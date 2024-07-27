@@ -3,7 +3,6 @@ import boto3
 import requests
 from loguru import logger
 from filters import Filters
-
 # Load environment variables
 images_bucket = os.environ["BUCKET_NAME"]
 queue_name = os.environ["FILTERS_QUEUE_NAME"]

@@ -52,12 +52,6 @@ module "polybot" {
   public_subnet_2_id = module.vpc.public_subnet_id_1
   public_subnet_1    = var.public_subnet_1
   public_subnet_2    = var.public_subnet_2
-  alb_url = module.resources.alb_url
-  bucket_name = module.resources.bucket_name
-  dynamodb_table_name = module.resources.dynamodb_table_name
-  filters_queue_url = module.resources.filters_queue_url
-  yolo_queue_url = module.resources.yolo_queue_url
-  aws_region = var.region
 }
 
 module "yolov5_filters" {

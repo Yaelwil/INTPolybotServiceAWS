@@ -32,7 +32,7 @@ resource "aws_launch_template" "yolov5_launch_template" {
     }
   }
 
-  user_data = base64encode(file("${path.module}/user_data.sh"))
+  user_data = base64encode(file("${path.module}/user_data_yolo.sh"))
 
   tag_specifications {
     resource_type = "instance"
@@ -43,9 +43,8 @@ resource "aws_launch_template" "yolov5_launch_template" {
   }
 }
 
-
 ###########################
-# filters launch template #
+# Filters launch template #
 ###########################
 
 resource "aws_launch_template" "filters_launch_template" {
@@ -65,10 +64,9 @@ resource "aws_launch_template" "filters_launch_template" {
     security_groups             = [aws_security_group.asg_sg.id]
   }
 
-    iam_instance_profile {
+  iam_instance_profile {
     name = var.iam_instance_profile
   }
-
 
   block_device_mappings {
     device_name           = var.filters_ebs_dev_name
@@ -79,7 +77,7 @@ resource "aws_launch_template" "filters_launch_template" {
     }
   }
 
-  user_data = base64encode(file("${path.module}/user_data.sh"))
+  user_data = base64encode(file("${path.module}/user_data_filters.sh"))
 
   tag_specifications {
     resource_type = "instance"

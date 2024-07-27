@@ -9,32 +9,6 @@ resource "aws_instance" "polybot" {
   iam_instance_profile         = var.iam_role
   user_data                    = file("${path.module}/user_data.sh")
 
-  provisioner "file" {
-    source      = local_file.env_file.filename
-    destination = "/home/ubuntu/.env"
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("/home/yael/yaelwil-tf.pem")
-      host        = self.public_ip
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 600 /home/ubuntu/.env",
-      "echo 'Environment file has been uploaded successfully.'"
-    ]
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("/home/yael/yaelwil-tf.pem")
-      host        = self.public_ip
-    }
-  }
-
   tags = {
     Name      = "${var.owner}-polybot-${var.project}-${count.index + 1}"
     Terraform = "true"

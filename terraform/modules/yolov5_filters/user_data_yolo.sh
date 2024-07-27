@@ -16,3 +16,12 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 
 sudo systemctl enable docker
 sudo systemctl start docker
+
+## Fetch tags using Docker Hub API and select the latest tag
+#IMAGE_NAME="yaeli1/yolov5"
+#PAGE_SIZE=100
+#LATEST_TAG=$(curl -s "https://hub.docker.com/v2/repositories/$IMAGE_NAME/tags/?page_size=$PAGE_SIZE" | \
+#    jq -r '.results | map(.name) | max_by(. | split(".") | map(tonumber))')
+#
+#sudo docker pull ${IMAGE_NAME}:${LATEST_TAG}
+#sudo docker run -d -p 8080:8080 --name yolov5 --env-file .env ${IMAGE_NAME}:${LATEST_TAG}
