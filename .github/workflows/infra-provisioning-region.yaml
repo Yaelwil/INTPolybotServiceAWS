@@ -1,3 +1,4 @@
+
 name: Polybot Infrastructure Terraform Specific Region
 
 on:
@@ -23,20 +24,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: REGION
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.2.0
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
 
       - name: Terraform init
         run: terraform init
@@ -49,29 +40,10 @@ jobs:
 
       - name: Terraform plan
         run: | 
-#          REGION="${{ matrix.region }}"
-#
-#          if [ "$REGION" == "eu-west-1" ]; then
-#            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
-#          elif [ "$REGION" == "us-east-1" ]; then
-#            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
-#          else
-#            SECRET_VALUE="UNKNOWN"
-#          fi
-#
           export TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}
           terraform plan -var-file=region.${{ inputs.region-code }}.tfvars
 
       - name: Terraform apply
-        run: |
-          REGION="${{ matrix.region }}"
-          
-          if [ "$REGION" == "eu-west-1" ]; then
-            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
-          elif [ "$REGION" == "us-east-1" ]; then
-            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
-          else
-            SECRET_VALUE="UNKNOWN"
-          fi
+        run: |   
           export TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}
           terraform apply -auto-approve -var-file=region.${{ inputs.region-code }}.tfvars

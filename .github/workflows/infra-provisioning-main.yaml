@@ -20,7 +20,6 @@ jobs:
       region-code: us-east-1
     secrets:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}
-      REGION: us-east-1
 
   eu-west-1:
     if: ${{ github.event.inputs.eu-west-1 == 'true' }}
@@ -29,4 +28,3 @@ jobs:
       region-code: eu-west-1
     secrets:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}
-      REGION: eu-west-1
