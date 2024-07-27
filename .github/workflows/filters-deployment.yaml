@@ -131,14 +131,6 @@ jobs:
           # Optionally, print the .env file for debugging purposes
           cat .env
 
-      - name: Upload .env to S3
-        run: |
-          aws s3 cp .env s3://yaelwil-bucket-tf-project-var-file/.env
-
-      - name: Clean up
-        run: rm .env
-
-
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
           FILTERS_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/filters:0.0.${{ github.run_number }}
