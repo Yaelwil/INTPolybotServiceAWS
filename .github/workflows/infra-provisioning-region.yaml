@@ -1,3 +1,4 @@
+
 name: Polybot Infrastructure Terraform Specific Region
 
 on:
@@ -14,11 +15,11 @@ jobs:
   Terraform:
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     defaults:
       run:
-        working-directory: terraform
+        working-directory: terraform  # The directory containing your Terraform configuration files
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -28,23 +29,40 @@ jobs:
         with:
           terraform_version: 1.2.0
 
-      - name: Debug Environment Variables
-        run: env | grep 'AWS\|TF_VAR'
-
       - name: Terraform init
         run: terraform init
 
       - name: Terraform workspace select
         run: terraform workspace select ${{ inputs.region-code }} || terraform workspace new ${{ inputs.region-code }}
 
-      - name: Set TELEGRAM_TOKEN
-        run: echo "TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}" >> $GITHUB_ENV
-
       - name: Terraform validate
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -var-file=region.${{ inputs.region-code }}.tfvars
+        run: | 
+          REGION="${{ matrix.region }}"
+          
+          if [ "$REGION" == "eu-west-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
+          elif [ "$REGION" == "us-east-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
+          else
+            SECRET_VALUE="UNKNOWN"
+          fi
+          
+          export TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}
+          terraform plan -var-file=region.${{ inputs.region-code }}.tfvars
 
       - name: Terraform apply
-        run: terraform apply -auto-approve -var-file=region.${{ inputs.region-code }}.tfvars
+        run: |
+          REGION="${{ matrix.region }}"
+          
+          if [ "$REGION" == "eu-west-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_EU_WEST_1 }}"
+          elif [ "$REGION" == "us-east-1" ]; then
+            SECRET_VALUE="${{ secrets.TELEGRAM_TOKEN_US_EAST_1 }}"
+          else
+            SECRET_VALUE="UNKNOWN"
+          fi
+          export TF_VAR_botToken=${{ secrets.TELEGRAM_TOKEN }}
+          terraform apply -auto-approve -var-file=region.${{ inputs.region-code }}.tfvars
