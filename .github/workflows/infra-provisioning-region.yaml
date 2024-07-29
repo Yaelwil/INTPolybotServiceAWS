@@ -10,9 +10,9 @@ on:
       TELEGRAM_TOKEN:
         required: true
       AWS_ACCESS_KEY:
-      equired: true
+        required: true
       AWS_SECRET_ACCESS_KEY:
-      required: true
+        required: true
 
 jobs:
   Terraform:
