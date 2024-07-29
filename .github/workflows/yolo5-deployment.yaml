@@ -136,7 +136,16 @@ jobs:
       - name: Create SSH key file and Copy ENV file to EC2 instances
         run: |
           YOLOV5_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/yolov5:0.0.${{ github.run_number }}
-          echo "${{ secrets.TF_PROJECT_PRIVATE_KEY }}" > ssh_key.pem
+          
+          REGION="${{ matrix.region }}"
+          if [ "$REGION" == "eu-west-1" ]; then
+            echo "${{ secrets.TF_PROJECT_IRELAND_PRIVATE_KEY }}" > ssh_key.pem
+          elif [ "$REGION" == "us-east-1" ]; then
+            echo "${{ secrets.TF_PROJECT_PRIVATE_KEY }}" > ssh_key.pem
+          else
+            SECRET_VALUE="UNKNOWN"
+          fi
+          
           sudo chmod 400 ssh_key.pem
           
           # Split IP addresses into an array
