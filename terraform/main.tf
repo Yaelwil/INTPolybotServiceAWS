@@ -44,7 +44,7 @@ module "polybot" {
   iam_role           = module.permissions.ec2_instance_profile
   instance_type      = var.instance_type
   number_of_polybot_machines = var.number_of_polybot_machines
-  public_key = "yaelwil-key-tf-project"
+  public_key = var.public_key_name
   ubuntu_ami = var.ubuntu_ami
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_1
@@ -68,7 +68,7 @@ module "yolov5_filters" {
   main_vpc_id        = module.vpc.vpc_id
   owner              = var.owner_name
   project            = var.project_name
-  public_key_path    = "yaelwil-key-tf-project"
+  public_key_path    = var.public_key_name
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
   filters_instance_type = var.filters_instance_type
