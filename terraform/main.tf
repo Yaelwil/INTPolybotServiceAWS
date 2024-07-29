@@ -21,8 +21,6 @@ module "resources" {
   public_subnet_1 = var.public_subnet_1
   public_subnet_2 = var.public_subnet_2
 
-  public_key_path    = var.public_key_path
-
   first_telegram_cidr = var.first_telegram_cidr
   second_telegram_cidr = var.second_telegram_cidr
 
@@ -46,7 +44,7 @@ module "polybot" {
   iam_role           = module.permissions.ec2_instance_profile
   instance_type      = var.instance_type
   number_of_polybot_machines = var.number_of_polybot_machines
-  public_key = module.resources.key_pair_name
+  public_key = "yaelwil-key-tf-project"
   ubuntu_ami = var.ubuntu_ami
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_1
@@ -70,7 +68,7 @@ module "yolov5_filters" {
   main_vpc_id        = module.vpc.vpc_id
   owner              = var.owner_name
   project            = var.project_name
-  public_key_path    = module.resources.key_pair_name
+  public_key_path    = "yaelwil-key-tf-project"
   public_subnet_1_id = module.vpc.public_subnet_id_1
   public_subnet_2_id = module.vpc.public_subnet_id_2
   filters_instance_type = var.filters_instance_type

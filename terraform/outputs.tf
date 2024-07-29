@@ -58,10 +58,10 @@ output "second_telegram_cidr" {
   value       = var.second_telegram_cidr
 }
 
-output "public_key_path" {
-  description = "public ssh key path"
-  value       = var.public_key_path
-}
+# output "public_key_path" {
+#   description = "public ssh key path"
+#   value       = var.public_key_path
+# }
 
 output "yolov5_instance_type" {
   description = "yolov5_instance_type"

@@ -16,10 +16,10 @@ variable "region" {
   type        = string
 }
 
-variable "public_key_path" {
-  description = "SSH key"
-  type        = string
-}
+# variable "public_key_path" {
+#   description = "SSH key"
+#   type        = string
+# }
 
 variable "main_vpc_cidr" {
   description = "main_vpc_cidr"
