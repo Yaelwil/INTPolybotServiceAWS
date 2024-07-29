@@ -3,5 +3,6 @@
  You can use multiple provider blocks in your Terraform configuration to manage resources from different providers.
 */
 provider "aws" {
+  version = "~> 5.0"
   region  = var.region
 }
