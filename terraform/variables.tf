@@ -80,10 +80,10 @@ variable "second_telegram_cidr" {
 type        = string
 }
 
-# variable "public_key_path" {
-#   description = "public ssh key path"
-#   type = string
-# }
+variable "public_key_name" {
+  description = "public ssh key path"
+  type = string
+}
 
 variable "yolov5_instance_type" {
   description = "yolov5_instance_type"
