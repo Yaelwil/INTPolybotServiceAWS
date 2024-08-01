@@ -14,12 +14,13 @@ resource "aws_acm_certificate" "self_signed" {
 ###########
 # Store the certificate body in Secrets Manager
 resource "aws_secretsmanager_secret" "certificate" {
-  name = "${var.owner}-certificate-m-${var.project}"
+  name = "${var.owner}-certificate-${uuid()}${var.project}"
   kms_key_id = aws_kms_key.kms_key.id  # Reference to the KMS key
 
-#   lifecycle {
-#     prevent_destroy = true
-#   }
+   lifecycle {
+#      prevent_destroy = true
+     ignore_changes = [name]
+   }
 }
 
 resource "aws_secretsmanager_secret_version" "certificate_version" {
