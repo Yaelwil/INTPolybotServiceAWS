@@ -61,7 +61,7 @@ resource "aws_lb_listener" "listener_8443" {
   protocol = "HTTPS" # protocol used by the listener
   ssl_policy      = "ELBSecurityPolicy-2016-08" # The SSL policy refers to a predefined SSL policy provided by AWS
   # TODO add the ACCOUNT_ID AND ARN of the SSL/TLS certificate used for encrypting connections to the listener
-#   certificate_arn   = data.aws_acm_certificate.example.arn
+#   certificate_arn   = ""
   certificate_arn   =aws_acm_certificate.self_signed.arn
 
   default_action {
