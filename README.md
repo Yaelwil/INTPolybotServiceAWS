@@ -103,4 +103,4 @@ Hands-on virtualization.
   - JSON.
 
 ## Continuous Integration / Continuous Deployment Pipeline
-- Introduction to CI/CD-
+- Introduction to CI/CD.
