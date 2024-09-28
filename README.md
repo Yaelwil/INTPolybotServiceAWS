@@ -62,3 +62,45 @@ The infrastructure is deployed across two AWS regions to enhance redundancy and 
   Instead of fully automating deployments, I designed the workflow to allow for selective apply or destroy commands, ensuring that resources are only provisioned when needed, which helps reduce cloud costs.
 
 ![Terraform project.jpeg](Terraform%20project.jpeg)
+
+
+## Operating Systems
+- Linux (Ubuntu)-  
+ Linux storage layout, Linux File Management, IO redirection, Processes, Environment variables & Package Management.
+
+## Programming Languages
+- Bash Scripting-  
+Bash and other shells, Bash command techniques, Bash variables, Bash conditional statements & loops.
+- Python Scripting-  
+Intro to Python, Control Flow, Data Structures, I/O, Error handling, Classes (Object-Oriented Programming), Modules.
+
+## Version Control
+- Git-  
+Git basics, branches, remotes, and workflows.
+- GitHub-  
+Actions, Pull requests, Variables & Secrets, Branch protection & rules, SSH keys.
+
+## Cloud
+- AWS-  
+Intro to AWS, EC2, EBS, S3, IAM, VPC, ELB, ASG, Lambda, DynamoDB, RDS, EKS.
+
+##  Containers
+- Docker-  
+Containers, images, networks, volumes, Docker Compose, Docker Hub.
+
+##  Infrastructure as Code
+- Terraform-  
+Infrastructure automation, managing cloud resources with Terraform.
+
+## Virtualization
+- VMware, VirtualBox-  
+Hands-on virtualization.
+
+## Automation and Configuration Management
+- Automating infrastructure using-   
+  - Ansible.
+  - YAML.
+  - JSON.
+
+## Continuous Integration / Continuous Deployment Pipeline
+- Introduction to CI/CD-
